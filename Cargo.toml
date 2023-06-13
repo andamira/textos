@@ -1,9 +1,9 @@
 [package]
 name = "textos"
 description = "text stuff"
-version = "0.0.0"
+version = "0.0.1"
 edition = "2021"
-rust-version = "1.67.1"
+rust-version = "1.70.0"
 authors = ["José Luis Cruz <joseluis@andamira.net>"]
 repository = "https://github.com/andamira/textos"
 documentation = "https://docs.rs/textos"
@@ -18,6 +18,19 @@ categories = ["value-formatting", "no-std"]
 keywords = []
 publish = false
 
+
+[features]
+default = ["std", "safe"]
+
+std = ["alloc", "devela/std", "unicode-truncate/std", "unicode-bidi/std", "unicode-script/std", "unicode-width/std"]
+alloc = []
+no-std = ["devela/no-std", "unicode-width/no_std"]
+#
+safe = ["devela/safe"]
+unsafe = [] # enable unsafe alternatives
+nightly = [] # used only for better docs
+
+
 [dependencies]
 devela = { version = "0.4", default-features = false }
 
@@ -30,19 +43,13 @@ unicode-segmentation = "1.10.1"
 unicode-truncate = { version = "0.2.0", default-features = false }
 unicode-width = { version = "0.1.10", default-features = false }
 
-[features]
-default = ["std", "safe"]
-safe = ["devela/safe"]
-std = ["devela/std", "unicode-truncate/std", "unicode-bidi/std", "unicode-script/std", "unicode-width/std"]
-no-std = ["devela/std", "unicode-width/no_std"]
-nightly = []
-doc = ["std", "nightly"]
 
 [dev-dependencies]
 
+
 [package.metadata.docs.rs]
-default-features = false
-features = ["doc"]
+no-default-features = true
+features = ["nightly", "std"]
 
 [badges]
 maintenance = { status = "experimental" }
