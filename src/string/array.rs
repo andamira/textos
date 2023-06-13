@@ -1,9 +1,10 @@
-// textas::array_string
+// textas::string::array
 //
-//!
+//! Strings backed by arrays.
 //
 
 use crate::error::{TextosError as Error, TextosResult as Result};
+use devela::paste;
 
 /// common impls for string types
 macro_rules! impl_string {
@@ -11,7 +12,7 @@ macro_rules! impl_string {
         $( impl_string![$bit, $cap]; )+
     };
     ($bit:expr, $cap:expr) => {
-        paste::paste! {
+        paste! {
             #[doc = "A " $bit "-bit UTF-8 string, with a fixed capacity of " $cap " bytes."]
             #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
             pub struct [<String$bit>] {
