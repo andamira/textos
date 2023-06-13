@@ -1,6 +1,6 @@
 [package]
 name = "textos"
-description = "text stuff"
+description = "Texts, strings, formatting, unicode…"
 version = "0.0.1"
 edition = "2021"
 rust-version = "1.70.0"
