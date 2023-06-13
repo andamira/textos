@@ -16,7 +16,7 @@ include = [
 ]
 categories = ["value-formatting", "no-std"]
 keywords = []
-publish = false
+publish = true
 
 
 [features]
