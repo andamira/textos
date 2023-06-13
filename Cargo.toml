@@ -7,24 +7,34 @@ rust-version = "1.67.1"
 authors = ["José Luis Cruz <joseluis@andamira.net>"]
 repository = "https://github.com/andamira/textos"
 documentation = "https://docs.rs/textos"
-license = "MIT/Apache-2.0"
+license = "MIT OR Apache-2.0"
 include = [
 	"/src/**/*.rs",
 	"/Cargo.toml",
 	"/LICENSE-*",
 	"/README.md",
 ]
-categories = []
+categories = ["value-formatting", "no-std"]
 keywords = []
 publish = false
 
 [dependencies]
-paste = "1.0.11"
+devela = { version = "0.4", default-features = false }
+
+unicode-bidi = { version = "0.3.10", default-features = false, features = ["hardcoded-data"] }
+unicode-blocks = { version = "0.1.5" }
+unicode-ident = { version = "1.0.6" }
+unicode-linebreak = "0.1.4"
+unicode-script = "0.5.5" # http://www.unicode.org/reports/tr24/
+unicode-segmentation = "1.10.1"
+unicode-truncate = { version = "0.2.0", default-features = false }
+unicode-width = { version = "0.1.10", default-features = false }
 
 [features]
 default = ["std", "safe"]
-safe = []
-std = []
+safe = ["devela/safe"]
+std = ["devela/std", "unicode-truncate/std", "unicode-bidi/std", "unicode-script/std", "unicode-width/std"]
+no-std = ["devela/std", "unicode-width/no_std"]
 nightly = []
 doc = ["std", "nightly"]
 
