@@ -4,10 +4,11 @@
 //
 
 mod array;
+mod counter;
 
-pub use array::*;
+pub use all::*;
 
 pub(crate) mod all {
     #[doc(inline)]
-    pub use super::array::*;
+    pub use super::{array::*, counter::counter_string};
 }

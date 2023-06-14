@@ -13,6 +13,9 @@ compile_error!("You can't enable the `std` and `no-std` features at the same tim
 #[cfg(all(feature = "safe", feature = "unsafe"))]
 compile_error!("You can't enable the `safe` and `unsafe` features at the same time.");
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 pub mod error;
 
 mod ascii;
