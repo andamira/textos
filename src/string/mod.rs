@@ -10,5 +10,9 @@ pub use all::*;
 
 pub(crate) mod all {
     #[doc(inline)]
-    pub use super::{array::*, counter::counter_string};
+    pub use super::array::*;
+
+    #[doc(inline)]
+    #[cfg(feature = "alloc")]
+    pub use super::counter::counter_string;
 }

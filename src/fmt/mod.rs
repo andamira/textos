@@ -3,7 +3,6 @@
 //! Formatting.
 //
 
-
 #[cfg(not(feature = "safe"))]
 mod int_buf;
 
