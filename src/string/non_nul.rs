@@ -13,22 +13,22 @@ use devela::paste;
 /// The nul character.
 const NUL: char = '\0';
 
-/// A string backed by an array that guarantees not to contain nul characters.
+/// A string backed by an array of constant capacity, that can't contain nul characters.
 ///
 /// Internally, the first 0 byte in the array indicates the end of the string.
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct NonNulStringStatic<const CAP: usize> {
+pub struct StaticNonNulString<const CAP: usize> {
     arr: [u8; CAP],
 }
 
-impl<const CAP: usize> NonNulStringStatic<CAP> {
-    /// Creates a new empty `NonNulStrigSized`.
+impl<const CAP: usize> StaticNonNulString<CAP> {
+    /// Creates a new empty `StaticNonNulString`.
     #[inline]
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Returns the total capacity of a in bytes.
+    /// Returns the total capacity in bytes.
     #[inline]
     pub const fn capacity() -> usize {
         CAP
@@ -61,16 +61,15 @@ impl<const CAP: usize> NonNulStringStatic<CAP> {
         self.len() == CAP
     }
 
-    //
-
     /// Sets the length to 0, by resetting all bytes to 0.
     #[inline]
     pub fn clear(&mut self) {
         self.arr = [0; CAP];
     }
 
+    //
+
     /// Returns a byte slice of the inner string slice.
-    ///
     #[inline]
     pub fn as_bytes(&self) -> &[u8] {
         #[cfg(feature = "safe")]
@@ -133,22 +132,16 @@ impl<const CAP: usize> NonNulStringStatic<CAP> {
         CString::new(self.to_string()).unwrap()
     }
 
+    //
+
     /// Removes the last character and returns it, or `None` if
     /// the string is empty.
+    #[inline]
     pub fn pop(&mut self) -> Option<char> {
-        let len = self.len();
-        if len == 0 {
+        if self.is_empty() {
             None
         } else {
-            let mut idx_last_char = len - 1;
-            while idx_last_char > 0 && !self.as_str().is_char_boundary(idx_last_char) {
-                idx_last_char -= 1;
-            }
-            let last_char = self.as_str()[idx_last_char..len].chars().next().unwrap();
-            for i in idx_last_char..len {
-                self.arr[i] = 0;
-            }
-            Some(last_char)
+            Some(self.pop_unchecked())
         }
     }
 
@@ -156,24 +149,34 @@ impl<const CAP: usize> NonNulStringStatic<CAP> {
     ///
     /// # Errors
     /// Returns an error if the string is empty.
+    #[inline]
     pub fn try_pop(&mut self) -> TextosResult<char> {
-        let len = self.len();
-        if len == 0 {
+        if self.is_empty() {
             Err(TextosError::NotEnoughElements(1))
         } else {
-            let mut idx_last_char = len - 1;
-            while idx_last_char > 0 && !self.as_str().is_char_boundary(idx_last_char) {
-                idx_last_char -= 1;
-            }
-            let last_char = self.as_str()[idx_last_char..len].chars().next().unwrap();
-            for i in idx_last_char..len {
-                self.arr[i] = 0;
-            }
-            Ok(last_char)
+            Ok(self.pop_unchecked())
         }
     }
 
-    /// Appends to the end the given `character`.
+    /// Removes the last character and returns it.
+    ///
+    /// # Panics
+    /// Panics if the string is empty.
+    #[inline]
+    pub fn pop_unchecked(&mut self) -> char {
+        let len = self.len();
+        let mut idx_last_char = len - 1;
+        while idx_last_char > 0 && !self.as_str().is_char_boundary(idx_last_char) {
+            idx_last_char -= 1;
+        }
+        let last_char = self.as_str()[idx_last_char..len].chars().next().unwrap();
+        for i in idx_last_char..len {
+            self.arr[i] = 0;
+        }
+        last_char
+    }
+
+    /// Appends to the end of the string the given `character`.
     ///
     /// Returns the number of bytes written.
     ///
@@ -193,7 +196,7 @@ impl<const CAP: usize> NonNulStringStatic<CAP> {
         }
     }
 
-    /// Tries to append to the end the given `character`.
+    /// Tries to append to the end of the string the given `character`.
     ///
     /// Returns the number of bytes written.
     ///
@@ -287,19 +290,22 @@ impl<const CAP: usize> NonNulStringStatic<CAP> {
 
 /* traits */
 
-impl<const CAP: usize> Default for NonNulStringStatic<CAP> {
+impl<const CAP: usize> Default for StaticNonNulString<CAP> {
     /// Returns an empty string.
+    #[inline]
     fn default() -> Self {
         Self { arr: [0; CAP] }
     }
 }
 
-impl<const CAP: usize> fmt::Display for NonNulStringStatic<CAP> {
+impl<const CAP: usize> fmt::Display for StaticNonNulString<CAP> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.as_str())
     }
 }
-impl<const CAP: usize> fmt::Debug for NonNulStringStatic<CAP> {
+impl<const CAP: usize> fmt::Debug for StaticNonNulString<CAP> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self.as_str())
     }
@@ -318,9 +324,9 @@ macro_rules! impl_sizes {
         )+
     };
     (@$bits_det:literal $bits:literal, $bytes:literal $bytes_plu:literal) => { paste! {
-        #[doc = "" $bits_det " " $bits "-bit non-nul UTF-8 string, with a fixed capacity of "
+        #[doc = "" $bits_det " " $bits "-bit non-nul string, with a fixed capacity of "
         $bytes " byte" $bytes_plu "."]
-        pub type [<NonNulString$bits>] = NonNulStringStatic<$bytes>;
+        pub type [<NonNulString$bits>] = StaticNonNulString<$bytes>;
     }};
 }
 impl_sizes![
@@ -328,11 +334,15 @@ impl_sizes![
     "A" 16, 2 "s";
     "A" 24, 3 "s";
     "A" 32, 4 "s";
+    "A" 40, 5 "s";
+    "A" 48, 6 "s";
+    "A" 56, 7 "s";
     "A" 64, 8 "s";
     "A" 128, 16 "s";
     "A" 256, 32 "s";
     "A" 512, 64 "s";
-    "A" 1024, 128 "s"
+    "A" 1024, 128 "s";
+    "A" 2048, 256 "s"
 ];
 
 macro_rules! impl_from_char {
@@ -364,5 +374,5 @@ macro_rules! impl_from_char {
         }
     }};
 }
-impl_from_char![NonNulString: 32, 64, 128, 256, 512, 1024];
-impl_from_char![NonNulString: 8, 16];
+impl_from_char![NonNulString: 32, 40, 48, 56, 64, 128, 256, 512, 1024, 2048];
+impl_from_char![try NonNulString: 8, 16, 24];
