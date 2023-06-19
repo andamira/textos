@@ -3,14 +3,14 @@
 //! Strings goodies.
 //
 
-mod array;
+mod sized;
 mod counter;
 
 pub use all::*;
 
 pub(crate) mod all {
     #[doc(inline)]
-    pub use super::array::*;
+    pub use super::sized::*;
 
     #[doc(inline)]
     #[cfg(feature = "alloc")]
