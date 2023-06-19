@@ -22,7 +22,9 @@ pub enum TextosError {
     // ///
     // OutOfBounds,
     /// Not enough capacity for the attempted operation.
-    NotEnoughCapacity,
+    ///
+    /// Returns the needed capacity for the operation.
+    NotEnoughCapacity(usize),
 
     // ///
     // PushCapacity(String),
@@ -71,7 +73,7 @@ mod core_impls {
     impl fmt::Display for TextosError {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             match self {
-                TextosError::NotEnoughCapacity => write!(f, "NotEnoughCapacity"),
+                TextosError::NotEnoughCapacity(c) => write!(f, "Not enough capacity. Needed: {c}"),
                 TextosError::Utf8(e) => fmt::Debug::fmt(e, f),
 
                 // TextosError::RateName(r) => Debug::fmt(r, f),

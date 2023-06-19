@@ -175,7 +175,7 @@ macro_rules! impl_string {
                     self.len += char_len as u8;
                     Ok(())
                 } else {
-                    Err(Error::NotEnoughCapacity)
+                    Err(Error::NotEnoughCapacity(char_len))
                 }
             }
 
