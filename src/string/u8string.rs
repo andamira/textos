@@ -14,13 +14,14 @@ use devela::paste;
 ///
 /// Internally, the current length is stored as a [`u8`].
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct StaticStringU8<const CAP: usize> {
-    arr: [u8; CAP], // WAIT for when we can use CAP: u8
+pub struct StaticU8String<const CAP: usize> {
+    // WAITING for when we can use CAP: u8 for panic-less const boundary check.
+    arr: [u8; CAP],
     len: u8,
 }
 
-impl<const CAP: usize> StaticStringU8<CAP> {
-    /// Creates a new empty `StaticStringU8`.
+impl<const CAP: usize> StaticU8String<CAP> {
+    /// Creates a new empty `StaticU8String`.
     ///
     /// # Panics
     /// Panics if `CAP` > 255.
@@ -223,7 +224,7 @@ impl<const CAP: usize> StaticStringU8<CAP> {
 
 /* traits */
 
-impl<const CAP: usize> Default for StaticStringU8<CAP> {
+impl<const CAP: usize> Default for StaticU8String<CAP> {
     /// Returns an empty string.
     ///
     /// # Panics
@@ -238,13 +239,13 @@ impl<const CAP: usize> Default for StaticStringU8<CAP> {
     }
 }
 
-impl<const CAP: usize> fmt::Display for StaticStringU8<CAP> {
+impl<const CAP: usize> fmt::Display for StaticU8String<CAP> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.as_str())
     }
 }
 
-impl<const CAP: usize> Deref for StaticStringU8<CAP> {
+impl<const CAP: usize> Deref for StaticU8String<CAP> {
     type Target = str;
     fn deref(&self) -> &Self::Target {
         self.as_str()
@@ -266,7 +267,7 @@ macro_rules! impl_sizes {
     (@$bits_det:literal $bits:literal, $bytes:literal $bytes_plu:literal) => { paste! {
         #[doc = "" $bits_det " " $bits "-bit UTF-8 static string, with a fixed capacity of "
         $bytes " byte" $bytes_plu "."]
-        pub type [<String$bits>] = StaticStringU8<$bytes>;
+        pub type [<String$bits>] = StaticU8String<$bytes>;
     }};
 }
 impl_sizes![
