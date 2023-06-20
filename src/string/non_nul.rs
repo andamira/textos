@@ -6,6 +6,7 @@
 #[cfg(feature = "alloc")]
 use alloc::{ffi::CString, str::Chars};
 
+use super::impl_sized_alias;
 use crate::error::{TextosError, TextosResult as Result};
 use core::fmt;
 use devela::paste;
@@ -321,24 +322,10 @@ impl<const CAP: usize> fmt::Debug for StaticNonNulString<CAP> {
 
 /* specific sizes */
 
-macro_rules! impl_sizes {
-    // $bits_det: determinant for the number of bits.
-    // $bits: number of bits.
-    // $bytes: number of bytes.
-    // $byte_plu: plural for the number of bytes.
-    ( $($bits_det:literal $bits:literal, $bytes:literal $bytes_plu:literal);+ ) => {
-        $(
-        impl_sizes![@$bits_det $bits, $bytes $bytes_plu];
-        )+
-    };
-    (@$bits_det:literal $bits:literal, $bytes:literal $bytes_plu:literal) => { paste! {
-        #[doc = "" $bits_det " " $bits
-        "-bit UTF-8-encoded string, with a fixed capacity of "
-        $bytes " byte" $bytes_plu ", that can’t contain nul characters."]
-        pub type [<NonNulString$bits>] = StaticNonNulString<$bytes>;
-    }};
-}
-impl_sizes![
+impl_sized_alias![
+    NonNulString, StaticNonNulString,
+    "UTF-8-encoded string, with a fixed capacity of ",
+    ", that can't contain nul characters.":
     "An" 8, 1 "";
     "A" 16, 2 "s";
     "A" 24, 3 "s";
