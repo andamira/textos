@@ -20,12 +20,13 @@ impl Char8 {
     #[inline]
     #[rustfmt::skip]
     pub const fn to_char(&self) -> char {
-        #[cfg(feature = "safe")]
+        // #[cfg(feature = "safe")]
         if let Some(c) = char::from_u32(self.0 as u32) { c } else { unreachable![] }
 
+        // WAITING for stable const: https://github.com/rust-lang/rust/issues/89259
         // SAFETY: we've already checked we contain a valid char.
-        #[cfg(not(feature = "safe"))]
-        return unsafe { char::from_u32_unchecked(self.0 as u32) };
+        // #[cfg(not(feature = "safe"))]
+        // return unsafe { char::from_u32_unchecked(self.0 as u32) };
     }
 }
 impl Char16 {
@@ -33,12 +34,13 @@ impl Char16 {
     #[inline]
     #[rustfmt::skip]
     pub const fn to_char(&self) -> char {
-        #[cfg(feature = "safe")]
+        // #[cfg(feature = "safe")]
         if let Some(c) = char::from_u32(self.0 as u32) { c } else { unreachable![] }
 
+        // WAITING for stable const: https://github.com/rust-lang/rust/issues/89259
         // SAFETY: we've already checked we contain a valid char.
-        #[cfg(not(feature = "safe"))]
-        return unsafe { char::from_u32_unchecked(self.0 as u32) };
+        // #[cfg(not(feature = "safe"))]
+        // return unsafe { char::from_u32_unchecked(self.0 as u32) };
     }
 }
 impl Char24 {
@@ -48,12 +50,13 @@ impl Char24 {
     pub const fn to_char(&self) -> char {
         let code_point = (self.0[0] as u32) << 16 | (self.0[1] as u32) << 8 | (self.0[2] as u32);
 
-        #[cfg(feature = "safe")]
+        // #[cfg(feature = "safe")]
         if let Some(c) = char::from_u32(code_point) { c } else { unreachable![] }
 
+        // WAITING for stable const: https://github.com/rust-lang/rust/issues/89259
         // SAFETY: we've already checked we contain a valid char.
-        #[cfg(not(feature = "safe"))]
-        return unsafe { char::from_u32_unchecked(code_point) };
+        // #[cfg(not(feature = "safe"))]
+        // return unsafe { char::from_u32_unchecked(code_point) };
     }
 }
 
