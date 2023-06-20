@@ -14,7 +14,7 @@ use devela::paste;
 /// with a maximum constant capacity of 255 bytes.
 ///
 /// Internally, the current length is stored as a [`u8`].
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct StaticU8String<const CAP: usize> {
     // WAITING for when we can use CAP: u8 for panic-less const boundary check.
     arr: [u8; CAP],
@@ -243,6 +243,13 @@ impl<const CAP: usize> Default for StaticU8String<CAP> {
 impl<const CAP: usize> fmt::Display for StaticU8String<CAP> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.as_str())
+    }
+}
+
+impl<const CAP: usize> fmt::Debug for StaticU8String<CAP> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self.as_str())
     }
 }
 
