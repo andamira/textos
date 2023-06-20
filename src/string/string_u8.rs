@@ -4,9 +4,9 @@
 //
 
 #[cfg(feature = "alloc")]
-use alloc::ffi::CString;
+use alloc::{ffi::CString, str::Chars};
 
-use crate::error::{TextosError, TextosResult};
+use crate::error::{TextosError, TextosResult as Result};
 use core::{fmt, ops::Deref};
 use devela::paste;
 
@@ -146,6 +146,13 @@ impl<const CAP: usize> StaticStringU8<CAP> {
         CString::new(self.to_string()).unwrap()
     }
 
+    /// Returns an iterator over the `chars` of this grapheme cluster.
+    #[cfg(feature = "alloc")]
+    #[cfg_attr(feature = "nightly", doc(cfg(feature = "alloc")))]
+    pub fn chars(&self) -> Chars {
+        self.as_str().chars()
+    }
+
     //
 
     /// Removes the last character and returns it, or `None` if
@@ -164,7 +171,7 @@ impl<const CAP: usize> StaticStringU8<CAP> {
     /// # Errors
     /// Returns an error if the string is empty.
     #[inline]
-    pub fn try_pop(&mut self) -> TextosResult<char> {
+    pub fn try_pop(&mut self) -> Result<char> {
         self.as_str()
             .chars()
             .last()
@@ -200,7 +207,7 @@ impl<const CAP: usize> StaticStringU8<CAP> {
     ///
     /// # Errors
     /// Errors if the capacity is not enough to hold the `character`.
-    pub fn try_push(&mut self, character: char) -> TextosResult<usize> {
+    pub fn try_push(&mut self, character: char) -> Result<usize> {
         let char_len = character.len_utf8();
         if self.remaining_capacity() >= char_len {
             let beg = self.len as usize;
@@ -298,7 +305,7 @@ macro_rules! impl_from_char {
     ( @try $for_name:ident: $for_bit:expr ) => { paste! {
         impl TryFrom<char> for [< $for_name $for_bit >] {
             type Error = TextosError;
-            fn try_from(c: char) -> TextosResult<[< $for_name $for_bit >]> {
+            fn try_from(c: char) -> Result<[< $for_name $for_bit >]> {
                 let mut s = Self::default();
                 s.try_push(c)?;
                 Ok(s)

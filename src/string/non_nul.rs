@@ -4,9 +4,9 @@
 //
 
 #[cfg(feature = "alloc")]
-use alloc::ffi::CString;
+use alloc::{ffi::CString, str::Chars};
 
-use crate::error::{TextosError, TextosResult};
+use crate::error::{TextosError, TextosResult as Result};
 use core::fmt;
 use devela::paste;
 
@@ -132,6 +132,13 @@ impl<const CAP: usize> StaticNonNulString<CAP> {
         CString::new(self.to_string()).unwrap()
     }
 
+    /// Returns an iterator over the `chars` of this grapheme cluster.
+    #[cfg(feature = "alloc")]
+    #[cfg_attr(feature = "nightly", doc(cfg(feature = "alloc")))]
+    pub fn chars(&self) -> Chars {
+        self.as_str().chars()
+    }
+
     //
 
     /// Removes the last character and returns it, or `None` if
@@ -150,7 +157,7 @@ impl<const CAP: usize> StaticNonNulString<CAP> {
     /// # Errors
     /// Returns an error if the string is empty.
     #[inline]
-    pub fn try_pop(&mut self) -> TextosResult<char> {
+    pub fn try_pop(&mut self) -> Result<char> {
         if self.is_empty() {
             Err(TextosError::NotEnoughElements(1))
         } else {
@@ -204,7 +211,7 @@ impl<const CAP: usize> StaticNonNulString<CAP> {
     ///
     /// # Errors
     /// Returns an error if the capacity is not enough to hold the given character.
-    pub fn try_push(&mut self, character: char) -> TextosResult<usize> {
+    pub fn try_push(&mut self, character: char) -> Result<usize> {
         let char_len = character.len_utf8();
 
         if character == NUL {
@@ -255,7 +262,7 @@ impl<const CAP: usize> StaticNonNulString<CAP> {
     /// # Errors
     /// Returns an error if the capacity is not enough to hold even the
     /// first non-nul character.
-    pub fn try_push_str(&mut self, string: &str) -> TextosResult<usize> {
+    pub fn try_push_str(&mut self, string: &str) -> Result<usize> {
         let first_char_len = string
             .chars()
             .find(|&c| c != NUL)
@@ -277,7 +284,7 @@ impl<const CAP: usize> StaticNonNulString<CAP> {
     /// # Errors
     /// Returns an error if the slice wont completely fit.
     #[inline]
-    pub fn try_push_str_complete(&mut self, string: &str) -> TextosResult<usize> {
+    pub fn try_push_str_complete(&mut self, string: &str) -> Result<usize> {
         let non_nul_len = string.as_bytes().iter().filter(|x| **x != 0).count();
 
         if self.remaining_capacity() >= non_nul_len {
@@ -366,7 +373,7 @@ macro_rules! impl_from_char {
     ( @try $for_name:ident: $for_bit:expr ) => { paste! {
         impl TryFrom<char> for [< $for_name $for_bit >] {
             type Error = TextosError;
-            fn try_from(c: char) -> TextosResult<[< $for_name $for_bit >]> {
+            fn try_from(c: char) -> Result<[< $for_name $for_bit >]> {
                 let mut s = Self::default();
                 s.try_push(c)?;
                 Ok(s)
