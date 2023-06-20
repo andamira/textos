@@ -10,7 +10,8 @@ use crate::error::{TextosError, TextosResult as Result};
 use core::{fmt, ops::Deref};
 use devela::paste;
 
-/// A string backed by an array, with a maximum constant capacity of 255 bytes.
+/// A UTF-8-encoded string, backed by an array,
+/// with a maximum constant capacity of 255 bytes.
 ///
 /// Internally, the current length is stored as a [`u8`].
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -265,7 +266,7 @@ macro_rules! impl_sizes {
         )+
     };
     (@$bits_det:literal $bits:literal, $bytes:literal $bytes_plu:literal) => { paste! {
-        #[doc = "" $bits_det " " $bits "-bit UTF-8 static string, with a fixed capacity of "
+        #[doc = "" $bits_det " " $bits "-bit UTF-8-encoded string, with a fixed capacity of "
         $bytes " byte" $bytes_plu "."]
         pub type [<String$bits>] = StaticU8String<$bytes>;
     }};

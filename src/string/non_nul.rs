@@ -13,7 +13,8 @@ use devela::paste;
 /// The nul character.
 const NUL: char = '\0';
 
-/// A string backed by an array of constant capacity, that can't contain nul characters.
+/// A UTF-8-encoded string, backed by an array of constant capacity,
+/// that can't contain nul characters.
 ///
 /// Internally, the first 0 byte in the array indicates the end of the string.
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -331,8 +332,9 @@ macro_rules! impl_sizes {
         )+
     };
     (@$bits_det:literal $bits:literal, $bytes:literal $bytes_plu:literal) => { paste! {
-        #[doc = "" $bits_det " " $bits "-bit non-nul string, with a fixed capacity of "
-        $bytes " byte" $bytes_plu "."]
+        #[doc = "" $bits_det " " $bits
+        "-bit UTF-8-encoded string, with a fixed capacity of "
+        $bytes " byte" $bytes_plu ", that can’t contain nul characters."]
         pub type [<NonNulString$bits>] = StaticNonNulString<$bytes>;
     }};
 }
