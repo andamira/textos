@@ -18,9 +18,9 @@ pub enum TextosError {
 
     // https://docs.rs/staticvec/latest/staticvec/enum.StringError.html
     // https://docs.rs/staticvec/latest/staticvec/struct.StaticString.html
-    //
-    // ///
-    // OutOfBounds,
+    /// The value is out of bounds.
+    OutOfBounds,
+
     /// Not enough capacity for the attempted operation.
     ///
     /// Returns the needed capacity.
@@ -68,23 +68,17 @@ mod core_impls {
         }
     }
 
-    // MAYBE
-    // impl From<EncodeError> for TextosError {
-    //     fn from(err: EncodeError) -> Self {
-    //         TextosError::RateName(err)
-    //     }
-    // }
-
     impl fmt::Display for TextosError {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            use TextosError::*;
             match self {
-                TextosError::NotEnoughCapacity(c) => write!(f, "Not enough capacity. Needed: {c}"),
-                TextosError::NotEnoughElements(e) => write!(f, "Not enough elements. Needed: {e}"),
-                TextosError::Utf8(e) => fmt::Debug::fmt(e, f),
+                OutOfBounds => write!(f, "The value is out of bounds."),
+                NotEnoughCapacity(c) => write!(f, "Not enough capacity. Needed: {c}"),
+                NotEnoughElements(e) => write!(f, "Not enough elements. Needed: {e}"),
+                Utf8(e) => fmt::Debug::fmt(e, f),
 
-                // TextosError::RateName(r) => Debug::fmt(r, f),
                 #[cfg(feature = "std")]
-                TextosError::Error(s) => write!(f, "Error: {s}"),
+                Error(s) => write!(f, "Error: {s}"),
             }
         }
     }
