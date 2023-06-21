@@ -20,13 +20,13 @@ macro_rules! core_impls {
         impl fmt::Display for [<$name $bits>] {
             #[inline]
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                write!(f, "{}", self.to_char())
+                write!(f, "{}", self.to_char32())
             }
         }
         impl fmt::Debug for [<$name $bits>] {
             #[inline]
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                write!(f, "{:?}", self.to_char())
+                write!(f, "{:?}", self.to_char32())
             }
         }
     }};
@@ -132,34 +132,19 @@ impl TryFrom<Char32> for Char8 {
     type Error = TextosError;
     #[inline]
     fn try_from(c: Char32) -> Result<Char8> {
-        if c.len_utf8() == 1 {
-            Ok(Char8(c as u8))
-        } else {
-            Err(TextosError::NotEnoughCapacity(c.len_utf8()))
-        }
+        Char8::try_from_char32(c)
     }
 }
 impl TryFrom<Char32> for Char16 {
     type Error = TextosError;
     #[inline]
     fn try_from(c: Char32) -> Result<Char16> {
-        if c.len_utf8() <= 2 {
-            Ok(Char16(c as u16))
-        } else {
-            Err(TextosError::NotEnoughCapacity(c.len_utf8()))
-        }
+        Char16::try_from_char32(c)
     }
 }
-impl TryFrom<Char32> for Char24 {
-    type Error = TextosError;
+impl From<Char32> for Char24 {
     #[inline]
-    fn try_from(c: Char32) -> Result<Char24> {
-        if c.len_utf8() <= 3 {
-            let mut bytes = [0; 3];
-            c.encode_utf8(&mut bytes);
-            Ok(Char24(bytes))
-        } else {
-            Err(TextosError::NotEnoughCapacity(4))
-        }
+    fn from(c: Char32) -> Char24 {
+        Char24::from_char32(c)
     }
 }
