@@ -1,4 +1,4 @@
-// textas::string
+// textos::string
 //
 //! Strings goodies.
 //

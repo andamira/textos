@@ -103,7 +103,7 @@ impl<const CAP: usize> StaticU8String<CAP> {
     ///
     /// The array contains all the bytes, including those outside the current length.
     #[inline]
-    pub fn as_array(&self) -> [u8; CAP] {
+    pub const fn as_array(&self) -> [u8; CAP] {
         self.arr
     }
 
@@ -111,7 +111,7 @@ impl<const CAP: usize> StaticU8String<CAP> {
     ///
     /// The array contains all the bytes, including those outside the current length.
     #[inline]
-    pub fn into_array(self) -> [u8; CAP] {
+    pub const fn into_array(self) -> [u8; CAP] {
         self.arr
     }
 
@@ -141,19 +141,19 @@ impl<const CAP: usize> StaticU8String<CAP> {
         unsafe { &mut *(self.as_bytes_mut() as *mut [u8] as *mut str) }
     }
 
+    /// Returns an iterator over the `chars` of this grapheme cluster.
+    #[cfg(feature = "alloc")]
+    #[cfg_attr(feature = "nightly", doc(cfg(feature = "alloc")))]
+    pub fn chars(&self) -> Chars {
+        self.as_str().chars()
+    }
+
     /// Returns a new allocated C-compatible, nul-terminanted string.
     #[inline]
     #[cfg(feature = "alloc")]
     #[cfg_attr(feature = "nightly", doc(cfg(feature = "alloc")))]
     pub fn to_cstring(&self) -> CString {
         CString::new(self.to_string()).unwrap()
-    }
-
-    /// Returns an iterator over the `chars` of this grapheme cluster.
-    #[cfg(feature = "alloc")]
-    #[cfg_attr(feature = "nightly", doc(cfg(feature = "alloc")))]
-    pub fn chars(&self) -> Chars {
-        self.as_str().chars()
     }
 
     //
