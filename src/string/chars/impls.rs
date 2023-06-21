@@ -1,4 +1,17 @@
 // textos::string::chars::impls
+//
+//!
+//
+// TOC
+// - common implementations
+//   - traits
+//   - const fns
+// - separate implementations
+//   - Char8
+//   - Char16
+//   - Char24
+//   - Char32 traits
+// - helper fns
 
 use super::{Char16, Char24, Char32, Char8, Chars, Strings};
 use crate::error::{TextosError, TextosResult as Result};
@@ -12,17 +25,19 @@ macro_rules! impls {
     };
     (@$name:ident: $bits:literal) => { paste! {
 
+        /* impl traits */
+
         impl Strings for [<$name $bits>] {}
 
         impl Chars for [<$name $bits>] {
             const MAX: Self = Self::MAX;
 
+            /* encode */
+
             #[inline]
             fn len_utf8(self) -> usize { self.len_utf8() }
-
             #[inline]
             fn len_utf16(self) -> usize { self.len_utf16() }
-
             #[inline]
             fn encode_utf8(self, dst: &mut [u8]) -> &mut str {
                 self.to_char32().encode_utf8(dst)
@@ -31,13 +46,44 @@ macro_rules! impls {
             fn encode_utf16(self, dst: &mut [u16]) -> &mut [u16] {
                 self.to_char32().encode_utf16(dst)
             }
+            #[inline]
+            fn to_digit(self, radix: u32) -> Option<u32> { self.to_digit(radix) }
+            #[inline]
+            fn to_ascii_uppercase(self) -> Self { self.to_ascii_uppercase() }
+            #[inline]
+            fn to_ascii_lowercase(self) -> Self { self.to_ascii_lowercase() }
+
+            /* queries */
 
             #[inline]
             fn is_noncharacter(self) -> bool { self.is_noncharacter() }
+            #[inline]
+            fn is_digit(self, radix: u32) -> bool { self.is_digit(radix) }
+            //
+            #[inline]
+            fn is_control(self) -> bool { self.to_char32().is_control() }
+            #[inline]
+            fn is_alphabetic(self) -> bool { self.to_char32().is_alphabetic() }
+            #[inline]
+            fn is_numeric(self) -> bool { self.to_char32().is_numeric() }
+            #[inline]
+            fn is_alphanumeric(self) -> bool { self.to_char32().is_alphanumeric() }
+            #[inline]
+            fn is_lowercase(self) -> bool { self.to_char32().is_lowercase() }
+            #[inline]
+            fn is_uppercase(self) -> bool { self.to_char32().is_uppercase() }
+            #[inline]
+            fn is_whitespace(self) -> bool { self.to_char32().is_whitespace() }
+            //
+            #[inline]
+            fn is_ascii(self) -> bool { self.is_ascii() }
         }
 
-        // const implementations directly over the type
+        /* impl const fns */
+
         impl [<$name $bits>] {
+
+            /* encode */
 
             /// Returns the number of bytes needed to encode in UTF-8.
             #[inline]
@@ -46,6 +92,29 @@ macro_rules! impls {
             /// Returns the number of bytes needed to encode in UTF-16.
             #[inline]
             pub const fn len_utf16(self) -> usize { self.to_char32().len_utf16() }
+
+            /// Converts the scalar to a digit in the given radix.
+            ///
+            /// ‘Digit’ is defined to be only the following characters:
+            /// `0-9`, `a-z`, `A-Z`.
+            ///
+            /// # Errors
+            /// Returns None if the char does not refer to a digit in the given radix.
+            ///
+            /// # Panics
+            /// Panics if given a radix larger than 36.
+            pub const fn to_digit(self, radix: u32) -> Option<u32> {
+                self.to_char32().to_digit(radix)
+            }
+
+            /* queries */
+
+            /// Checks if the unicode scalar is a digit in the given radix.
+            ///
+            /// See also [`to_digit`][Self#method.to_digit].
+            pub const fn is_digit(self, radix: u32) -> bool {
+                if let Some(_) = self.to_digit(radix) { true } else { false }
+            }
         }
     }};
 }
@@ -83,6 +152,9 @@ impl Char8 {
             Err(TextosError::OutOfBounds)
         }
     }
+    const fn from_char32_unchecked(c: Char32) -> Char8 {
+        Char8(c as u32 as u8)
+    }
 
     /* queries */
 
@@ -100,6 +172,32 @@ impl Char8 {
     #[inline]
     pub const fn is_character(self) -> bool {
         !self.is_noncharacter()
+    }
+
+    /// Checks if the value is within the ASCII range.
+    #[inline]
+    pub const fn is_ascii(self) -> bool {
+        self.0 <= 0x7F
+    }
+
+    /// Makes a copy of the value in its ASCII upper case equivalent.
+    ///
+    /// ASCII letters ‘a’ to ‘z’ are mapped to ‘A’ to ‘Z’, but non-ASCII letters
+    /// are unchanged.
+    #[inline]
+    #[rustfmt::skip]
+    pub const fn to_ascii_uppercase(self) -> Char8 {
+        Self::from_char32_unchecked(char::to_ascii_uppercase(&self.to_char32()))
+    }
+
+    /// Makes a copy of the value in its ASCII lower case equivalent.
+    ///
+    /// ASCII letters ‘A’ to ‘Z’ are mapped to ‘a’ to ‘z’, but non-ASCII letters
+    /// are unchanged.
+    #[inline]
+    #[rustfmt::skip]
+    pub const fn to_ascii_lowercase(self) -> Char8 {
+        Self::from_char32_unchecked(char::to_ascii_lowercase(&self.to_char32()))
     }
 }
 
@@ -138,6 +236,29 @@ impl Char16 {
             Err(TextosError::OutOfBounds)
         }
     }
+    const fn from_char32_unchecked(c: Char32) -> Char16 {
+        Char16(c as u32 as u16)
+    }
+
+    /// Makes a copy of the value in its ASCII upper case equivalent.
+    ///
+    /// ASCII letters ‘a’ to ‘z’ are mapped to ‘A’ to ‘Z’, but non-ASCII letters
+    /// are unchanged.
+    #[inline]
+    #[rustfmt::skip]
+    pub const fn to_ascii_uppercase(self) -> Char16 {
+        Self::from_char32_unchecked(char::to_ascii_uppercase(&self.to_char32()))
+    }
+
+    /// Makes a copy of the value in its ASCII lower case equivalent.
+    ///
+    /// ASCII letters ‘A’ to ‘Z’ are mapped to ‘a’ to ‘z’, but non-ASCII letters
+    /// are unchanged.
+    #[inline]
+    #[rustfmt::skip]
+    pub const fn to_ascii_lowercase(self) -> Char16 {
+        Self::from_char32_unchecked(char::to_ascii_lowercase(&self.to_char32()))
+    }
 
     /* queries */
 
@@ -148,12 +269,19 @@ impl Char16 {
     pub const fn is_noncharacter(self) -> bool {
         is_noncharacter(self.0 as u32)
     }
+
     /// Returns `true` if this unicode scalar is an [abstract character][0].
     ///
     /// [0]: https://www.unicode.org/glossary/#abstract_character
     #[inline]
     pub const fn is_character(self) -> bool {
         !self.is_noncharacter()
+    }
+
+    /// Checks if the value is within the ASCII range.
+    #[inline]
+    pub const fn is_ascii(self) -> bool {
+        self.0 <= 0x7F
     }
 }
 
@@ -168,14 +296,18 @@ impl Char24 {
 
     /* conversions */
 
+    // helper
+    #[inline]
+    const fn to_u32(self) -> u32 {
+        (self.0[0] as u32) << 16 | (self.0[1] as u32) << 8 | (self.0[2] as u32)
+    }
+
     /// Converts this `Char24` to a `Char32`.
     #[inline]
     #[rustfmt::skip]
     pub const fn to_char32(self) -> char {
-        let code_point = (self.0[0] as u32) << 16 | (self.0[1] as u32) << 8 | (self.0[2] as u32);
-
         // #[cfg(feature = "safe")]
-        if let Some(c) = char::from_u32(code_point) { c } else { unreachable![] }
+        if let Some(c) = char::from_u32(self.to_u32()) { c } else { unreachable![] }
 
         // WAITING for stable const: https://github.com/rust-lang/rust/issues/89259
         // SAFETY: we've already checked we contain a valid char.
@@ -192,6 +324,26 @@ impl Char24 {
         Char24([b0, b1, b2])
     }
 
+    /// Makes a copy of the value in its ASCII upper case equivalent.
+    ///
+    /// ASCII letters ‘a’ to ‘z’ are mapped to ‘A’ to ‘Z’, but non-ASCII letters
+    /// are unchanged.
+    #[inline]
+    #[rustfmt::skip]
+    pub const fn to_ascii_uppercase(self) -> Char24 {
+        Self::from_char32(char::to_ascii_uppercase(&self.to_char32()))
+    }
+
+    /// Makes a copy of the value in its ASCII lower case equivalent.
+    ///
+    /// ASCII letters ‘A’ to ‘Z’ are mapped to ‘a’ to ‘z’, but non-ASCII letters
+    /// are unchanged.
+    #[inline]
+    #[rustfmt::skip]
+    pub const fn to_ascii_lowercase(self) -> Char24 {
+        Self::from_char32(char::to_ascii_lowercase(&self.to_char32()))
+    }
+
     /* queries */
 
     /// Returns `true` if this unicode scalar is a [noncharacter][0].
@@ -199,9 +351,9 @@ impl Char24 {
     /// [0]: https://www.unicode.org/glossary/#noncharacter
     #[inline]
     pub const fn is_noncharacter(self) -> bool {
-        let code = (self.0[0] as u32) << 16 | (self.0[1] as u32) << 8 | (self.0[2] as u32);
-        is_noncharacter(code)
+        is_noncharacter(self.to_u32())
     }
+
     /// Returns `true` if this unicode scalar is an [abstract character][0].
     ///
     /// [0]: https://www.unicode.org/glossary/#abstract_character
@@ -209,23 +361,31 @@ impl Char24 {
     pub const fn is_character(self) -> bool {
         !self.is_noncharacter()
     }
+
+    /// Checks if the value is within the ASCII range.
+    #[inline]
+    pub const fn is_ascii(self) -> bool {
+        self.to_u32() <= 0x7F
+    }
 }
+
+/* traits for Char32 */
 
 impl Strings for Char32 {}
 
 impl Chars for Char32 {
     const MAX: Self = Self::MAX;
 
+    /* encode */
+
     #[inline]
     fn len_utf8(self) -> usize {
         self.len_utf8()
     }
-
     #[inline]
     fn len_utf16(self) -> usize {
         self.len_utf16()
     }
-
     #[inline]
     fn encode_utf8(self, dst: &mut [u8]) -> &mut str {
         self.encode_utf8(dst)
@@ -234,14 +394,68 @@ impl Chars for Char32 {
     fn encode_utf16(self, dst: &mut [u16]) -> &mut [u16] {
         self.encode_utf16(dst)
     }
+    #[inline]
+    fn to_digit(self, radix: u32) -> Option<u32> {
+        self.to_digit(radix)
+    }
+    #[inline]
+    fn to_ascii_uppercase(self) -> Char32 {
+        char::to_ascii_uppercase(&self)
+    }
+    #[inline]
+    fn to_ascii_lowercase(self) -> Char32 {
+        char::to_ascii_lowercase(&self)
+    }
+
+    /* queries */
 
     #[inline]
     fn is_noncharacter(self) -> bool {
         is_noncharacter(self as u32)
     }
+    #[inline]
+    fn is_digit(self, radix: u32) -> bool {
+        self.is_digit(radix)
+    }
+    #[inline]
+    fn is_control(self) -> bool {
+        self.is_control()
+    }
+    #[inline]
+    fn is_alphabetic(self) -> bool {
+        self.is_alphabetic()
+    }
+    #[inline]
+    fn is_numeric(self) -> bool {
+        self.is_numeric()
+    }
+    #[inline]
+    fn is_alphanumeric(self) -> bool {
+        self.is_alphanumeric()
+    }
+    #[inline]
+    fn is_lowercase(self) -> bool {
+        self.is_lowercase()
+    }
+    #[inline]
+    fn is_uppercase(self) -> bool {
+        self.is_uppercase()
+    }
+    #[inline]
+    fn is_whitespace(self) -> bool {
+        self.is_whitespace()
+    }
+
+    /* ascii queries*/
+
+    #[inline]
+    fn is_ascii(self) -> bool {
+        (self as u32) <= 0x7F
+    }
 }
 
-//
+/* helper fns */
+
 #[inline]
 const fn is_noncharacter(code: u32) -> bool {
     // sub-block of 32 non-characters:

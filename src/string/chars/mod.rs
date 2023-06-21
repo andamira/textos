@@ -1,6 +1,6 @@
 // textos::string::chars
 //
-//! Character types.
+//! Unicode scalar types.
 //
 
 use super::Strings;
@@ -64,13 +64,13 @@ pub trait Chars: Strings {
     /// The highest unicode scalar that can be represented by this type.
     const MAX: Self;
 
+    /* encode */
+
     /// Returns the number of bytes needed to encode in UTF-8.
     fn len_utf8(self) -> usize;
 
     /// Returns the number of bytes needed to encode in UTF-16.
     fn len_utf16(self) -> usize;
-
-    /* encode */
 
     /// Encodes this scalar as UTF-8 into the provided byte buffer,
     /// and then returns the subslice of the buffer that contains the encoded scalar.
@@ -87,6 +87,34 @@ pub trait Chars: Strings {
     /// Panics if the buffer is not large enough.
     /// A buffer of length 2 is large enough to encode any char.
     fn encode_utf16(self, dst: &mut [u16]) -> &mut [u16];
+
+    /// Converts the scalar to a digit in the given radix.
+    ///
+    /// ‘Digit’ is defined to be only the following characters:
+    /// `0-9`, `a-z`, `A-Z`.
+    ///
+    /// # Errors
+    /// Returns None if the char does not refer to a digit in the given radix.
+    ///
+    /// # Panics
+    /// Panics if given a radix larger than 36.
+    fn to_digit(self, radix: u32) -> Option<u32>;
+
+    /// Makes a copy of the value in its ASCII upper case equivalent.
+    ///
+    /// ASCII letters ‘a’ to ‘z’ are mapped to ‘A’ to ‘Z’, but non-ASCII letters
+    /// are unchanged.
+    fn to_ascii_uppercase(self) -> Self
+    where
+        Self: Sized;
+
+    /// Makes a copy of the value in its ASCII lower case equivalent.
+    ///
+    /// ASCII letters ‘A’ to ‘Z’ are mapped to ‘a’ to ‘z’, but non-ASCII letters
+    /// are unchanged.
+    fn to_ascii_lowercase(self) -> Self
+    where
+        Self: Sized;
 
     /* escape */
 
@@ -107,4 +135,43 @@ pub trait Chars: Strings {
     {
         !self.is_noncharacter()
     }
+
+    /// Checks if the unicode scalar is a digit in the given radix.
+    ///
+    /// See also [`to_digit`][Self#method.to_digit].
+    fn is_digit(self, radix: u32) -> bool;
+
+    /// Returns `true` if this unicode scalar has the general category for
+    /// control codes.
+    fn is_control(self) -> bool;
+
+    /// Returns `true` if this unicode scalar has the `Alphabetic` property.
+    fn is_alphabetic(self) -> bool;
+
+    /// Returns `true` if this unicode scalar has one of the general categories
+    /// for numbers.
+    ///
+    /// If you want to parse ASCII decimal digits (0-9) or ASCII base-N,
+    /// use [`is_ascii_digit`][Self#method.is_ascii_digit] or
+    /// [`is_digit`][Self#method.is_digit] instead.
+    fn is_numeric(self) -> bool;
+
+    /// Returns `true` if this unicode scalar satisfies either
+    /// [`is_alphabetic()`][Self#method.is_alphabetic] or
+    /// [`is_numeric()`][Self#method.is_numeric].
+    fn is_alphanumeric(self) -> bool;
+
+    /// Returns `true` if this unicode scalar has the `Lowercase` property.
+    fn is_lowercase(self) -> bool;
+
+    /// Returns `true` if this unicode scalar has the `Lowercase` property.
+    fn is_uppercase(self) -> bool;
+
+    /// Returns `true` if this unicode scalar has the `White_Space` property.
+    fn is_whitespace(self) -> bool;
+
+    /* ascii */
+
+    /// Checks if the value is within the ASCII range.
+    fn is_ascii(self) -> bool;
 }

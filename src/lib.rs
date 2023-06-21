@@ -3,6 +3,7 @@
 //
 
 #![warn(clippy::all)]
+#![allow(clippy::wrong_self_convention)]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(feature = "safe", forbid(unsafe_code))]
 #![cfg_attr(feature = "nightly", feature(doc_cfg))]
