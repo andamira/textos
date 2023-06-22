@@ -22,6 +22,7 @@ mod tests;
 /// [scalar]: https://www.unicode.org/glossary/#unicode_scalar_value
 /// [0w]: https://en.wikipedia.org/wiki/Basic_Latin_(Unicode_block)
 /// [1w]: https://en.wikipedia.org/wiki/Latin-1_Supplement
+#[repr(transparent)]
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Char8(u8);
 
@@ -35,6 +36,7 @@ pub struct Char8(u8);
 ///
 /// [scalar]: https://www.unicode.org/glossary/#unicode_scalar_value
 /// [0w]: https://en.wikipedia.org/wiki/Plane_(Unicode)#Basic_Multilingual_Plane
+#[repr(transparent)]
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Char16(u16);
 
@@ -46,6 +48,7 @@ pub struct Char16(u16);
 /// See also: [`Char8`], [`Char16`], [`Char32`].
 ///
 /// [scalar]: https://www.unicode.org/glossary/#unicode_scalar_value
+#[repr(transparent)]
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Char24([u8; 3]);
 
@@ -57,7 +60,9 @@ pub struct Char24([u8; 3]);
 /// See also: [`Char8`], [`Char16`], [`Char24`].
 ///
 /// [scalar]: https://www.unicode.org/glossary/#unicode_scalar_value
-pub type Char32 = char;
+#[repr(transparent)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Char32(pub char);
 
 /// Common trait for unicode scalars.
 pub trait Chars: Strings {

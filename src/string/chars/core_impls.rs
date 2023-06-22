@@ -20,13 +20,13 @@ macro_rules! core_impls {
         impl fmt::Display for [<$name $bits>] {
             #[inline]
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                write!(f, "{}", self.to_char32())
+                write!(f, "{}", self.to_char())
             }
         }
         impl fmt::Debug for [<$name $bits>] {
             #[inline]
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                write!(f, "{:?}", self.to_char32())
+                write!(f, "{:?}", self.to_char())
             }
         }
         impl fmt::Binary for [<$name $bits>] {
@@ -51,7 +51,7 @@ macro_rules! core_impls {
         }
     }};
 }
-core_impls![Char: 8+0, 16+0, 24+[0,0,0]];
+core_impls![Char: 8+0, 16+0, 24+[0,0,0], 32+'\x00'];
 
 /* From Char8 */
 
@@ -70,6 +70,12 @@ impl From<Char8> for Char24 {
 impl From<Char8> for Char32 {
     #[inline]
     fn from(c: Char8) -> Char32 {
+        Char32(c.0.into())
+    }
+}
+impl From<Char8> for char {
+    #[inline]
+    fn from(c: Char8) -> char {
         c.0.into()
     }
 }
@@ -98,11 +104,17 @@ impl From<Char16> for Char32 {
     #[inline]
     fn from(c: Char16) -> Char32 {
         #[cfg(feature = "safe")]
-        return char::from_u32(c.0 as u32).unwrap();
+        return Char32(char::from_u32(c.0 as u32).unwrap());
 
         // SAFETY: we've already checked we contain a valid char.
         #[cfg(not(feature = "safe"))]
-        return unsafe { char::from_u32_unchecked(c.0 as u32) };
+        return unsafe { Char32(char::from_u32_unchecked(c.0 as u32)) };
+    }
+}
+impl From<Char16> for char {
+    #[inline]
+    fn from(c: Char16) -> char {
+        c.to_char()
     }
 }
 
@@ -138,11 +150,17 @@ impl From<Char24> for Char32 {
         let code_point = (c.0[0] as u32) << 16 | (c.0[1] as u32) << 8 | (c.0[2] as u32);
 
         #[cfg(feature = "safe")]
-        return char::from_u32(code_point).unwrap();
+        return Char32(char::from_u32(code_point).unwrap());
 
         // SAFETY: we've already checked we contain a valid char.
         #[cfg(not(feature = "safe"))]
-        return unsafe { char::from_u32_unchecked(code_point) };
+        return unsafe { Char32(char::from_u32_unchecked(code_point)) };
+    }
+}
+impl From<Char24> for char {
+    #[inline]
+    fn from(c: Char24) -> char {
+        c.to_char()
     }
 }
 
@@ -152,19 +170,25 @@ impl TryFrom<Char32> for Char8 {
     type Error = TextosError;
     #[inline]
     fn try_from(c: Char32) -> Result<Char8> {
-        Char8::try_from_char32(c)
+        Char8::try_from_char(c.0)
     }
 }
 impl TryFrom<Char32> for Char16 {
     type Error = TextosError;
     #[inline]
     fn try_from(c: Char32) -> Result<Char16> {
-        Char16::try_from_char32(c)
+        Char16::try_from_char(c.0)
     }
 }
 impl From<Char32> for Char24 {
     #[inline]
     fn from(c: Char32) -> Char24 {
-        Char24::from_char32(c)
+        Char24::from_char(c.0)
+    }
+}
+impl From<Char32> for char {
+    #[inline]
+    fn from(c: Char32) -> char {
+        c.0
     }
 }
