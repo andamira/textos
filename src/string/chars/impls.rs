@@ -553,19 +553,27 @@ impl Char24 {
     /// Converts a `Char7` to `Char24`.
     #[inline]
     pub const fn from_char7(c: Char7) -> Char24 {
-        Char24([0, 0, c.0])
+        Char24 {
+            hi: 0,
+            mi: 0,
+            lo: c.0,
+        }
     }
     /// Converts a `Char8` to `Char24`.
     #[inline]
     pub const fn from_char8(c: Char8) -> Char24 {
-        Char24([0, 0, c.0])
+        Char24 {
+            hi: 0,
+            mi: 0,
+            lo: c.0,
+        }
     }
     /// Converts a `Char16` to `Char24`.
     #[inline]
     pub const fn from_char16(c: Char16) -> Char24 {
-        let b0 = (c.0 & 0x00FF) as u8;
-        let b1 = ((c.0 & 0xFF00) >> 8) as u8;
-        Char24([0, b1, b0])
+        let mi = ((c.0 & 0xFF00) >> 8) as u8;
+        let lo = (c.0 & 0x00FF) as u8;
+        Char24 { hi: 0, mi, lo }
     }
     /// Converts a `Char32` to `Char24`.
     #[inline]
@@ -575,10 +583,10 @@ impl Char24 {
     /// Converts a `char` to `Char24`.
     #[inline]
     pub const fn from_char(c: char) -> Char24 {
-        let b0 = (c as u32 & 0x000000FF) as u8;
-        let b1 = ((c as u32 & 0x0000FF00) >> 8) as u8;
-        let b2 = ((c as u32 & 0x001F0000) >> 16) as u8;
-        Char24([b2, b1, b0])
+        let hi = ((c as u32 & 0x001F0000) >> 16) as u8;
+        let mi = ((c as u32 & 0x0000FF00) >> 8) as u8;
+        let lo = (c as u32 & 0x000000FF) as u8;
+        Char24 { hi, mi, lo }
     }
 
     //
@@ -606,7 +614,7 @@ impl Char24 {
     /// Converts this `Char24` to `u32`.
     #[inline]
     pub const fn to_u32(self) -> u32 {
-        (self.0[0] as u32) << 16 | (self.0[1] as u32) << 8 | (self.0[2] as u32)
+        (self.hi as u32) << 16 | (self.mi as u32) << 8 | (self.lo as u32)
     }
     /// Converts this `Char24` to `char`.
     #[inline]

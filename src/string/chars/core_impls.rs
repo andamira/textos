@@ -15,7 +15,7 @@ macro_rules! core_impls {
         /// Returns the default value of `\x00` (nul character).
         impl Default for [<$name $bits>] {
             #[inline]
-            fn default() -> Self { Self($default) }
+            fn default() -> Self { $default }
         }
         impl fmt::Display for [<$name $bits>] {
             #[inline]
@@ -51,7 +51,7 @@ macro_rules! core_impls {
         }
     }};
 }
-core_impls![Char: 7+0, 8+0, 16+0, 24+[0,0,0], 32+'\x00'];
+core_impls![Char: 7+Self(0), 8+Self(0), 16+Self(0), 24+Self{hi:0,mi:0,lo:0}, 32+Self('\x00')];
 
 /* From Char7 */
 

@@ -60,11 +60,12 @@ pub struct Char16(u16);
 /// See also: [`Char7`], [`Char8`], [`Char16`], [`Char32`], [`char`].
 ///
 /// [scalar]: https://www.unicode.org/glossary/#unicode_scalar_value
-//
-// The scalar is internally represented as a little-endian byte array.
-#[repr(transparent)]
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Char24([u8; 3]);
+pub struct Char24 {
+    hi: u8, // highest byte
+    mi: u8, // middle byte
+    lo: u8, // lowest byte
+}
 
 /// A 32-bit [unicode scalar value][scalar].
 ///
