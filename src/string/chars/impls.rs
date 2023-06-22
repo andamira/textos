@@ -14,7 +14,7 @@
 //   - traits for char
 // - helper fns
 
-use super::{Char16, Char24, Char32, Char7, Char8, Chars, Strings};
+use super::{Char16, Char24, Char32, Char7, Char8, Chars, NonMaxU8, Strings};
 use crate::error::{TextosError, TextosResult as Result};
 use devela::paste;
 
@@ -132,7 +132,7 @@ impl Char7 {
     /* constants */
 
     /// The highest unicode scalar a `Char7` can represent, `'\u{7F}'`.
-    pub const MAX: Char7 = Char7(0x7F);
+    pub const MAX: Char7 = Char7::new_unchecked(0x7F);
 
     /* conversions */
 
@@ -140,7 +140,7 @@ impl Char7 {
     #[inline]
     pub const fn try_from_char8(c: Char8) -> Result<Char7> {
         if is_7bit(c.to_u32()) {
-            Ok(Char7(c.to_u32() as u8))
+            Ok(Char7::new_unchecked(c.to_u32() as u8))
         } else {
             Err(TextosError::OutOfBounds)
         }
@@ -149,7 +149,7 @@ impl Char7 {
     #[inline]
     pub const fn try_from_char16(c: Char16) -> Result<Char7> {
         if is_7bit(c.to_u32()) {
-            Ok(Char7(c.to_u32() as u8))
+            Ok(Char7::new_unchecked(c.to_u32() as u8))
         } else {
             Err(TextosError::OutOfBounds)
         }
@@ -159,7 +159,7 @@ impl Char7 {
     pub const fn try_from_char24(c: Char24) -> Result<Char7> {
         let c = c.to_u32();
         if is_7bit(c) {
-            Ok(Char7(c as u8))
+            Ok(Char7::new_unchecked(c as u8))
         } else {
             Err(TextosError::OutOfBounds)
         }
@@ -168,7 +168,7 @@ impl Char7 {
     #[inline]
     pub const fn try_from_char32(c: Char32) -> Result<Char7> {
         if is_7bit(c.to_u32()) {
-            Ok(Char7(c.to_u32() as u8))
+            Ok(Char7::new_unchecked(c.to_u32() as u8))
         } else {
             Err(TextosError::OutOfBounds)
         }
@@ -177,13 +177,26 @@ impl Char7 {
     #[inline]
     pub const fn try_from_char(c: char) -> Result<Char7> {
         if is_7bit(c as u32) {
-            Ok(Char7(c as u32 as u8))
+            Ok(Char7::new_unchecked(c as u32 as u8))
         } else {
             Err(TextosError::OutOfBounds)
         }
     }
     const fn from_char_unchecked(c: char) -> Char7 {
-        Char7(c as u32 as u8)
+        Char7::new_unchecked(c as u32 as u8)
+    }
+    // useful because Option::<T>::unwrap is not yet stable as const fn
+    const fn new_unchecked(value: u8) -> Char7 {
+        #[cfg(feature = "safe")]
+        if let Some(c) = NonMaxU8::new(value) {
+            Char7(c)
+        } else {
+            unreachable![]
+        }
+        #[cfg(not(feature = "safe"))]
+        unsafe {
+            Char7(NonMaxU8::new_unchecked(value))
+        }
     }
 
     //
@@ -212,12 +225,12 @@ impl Char7 {
     #[inline]
     #[rustfmt::skip]
     pub const fn to_char(self) -> char {
-        self.0 as char
+        self.0.get() as char
     }
     /// Converts this `Char7` to `u32`.
     #[inline]
     pub const fn to_u32(self) -> u32 {
-        self.0 as u32
+        self.0.get() as u32
     }
 
     //
@@ -277,7 +290,7 @@ impl Char8 {
     /// Converts a `Char7` to `Char8`.
     #[inline]
     pub const fn from_char7(c: Char7) -> Char8 {
-        Self(c.0)
+        Self(c.0.get())
     }
     /// Tries to convert a `Char16` to `Char8`.
     #[inline]
@@ -417,7 +430,7 @@ impl Char16 {
     /// Converts a `Char7` to `Char16`.
     #[inline]
     pub const fn from_char7(c: Char7) -> Char16 {
-        Char16(c.0 as u16)
+        Char16(c.0.get() as u16)
     }
     /// Converts a `Char8` to `Char16`.
     #[inline]
@@ -556,7 +569,7 @@ impl Char24 {
         Char24 {
             hi: 0,
             mi: 0,
-            lo: c.0,
+            lo: c.0.get(),
         }
     }
     /// Converts a `Char8` to `Char24`.

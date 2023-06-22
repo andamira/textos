@@ -4,17 +4,22 @@
 //
 
 use super::Strings;
+use devela::NonSpecificU8;
 
 mod core_impls;
 mod impls;
 #[cfg(test)]
 mod tests;
 
+pub(crate) type NonMaxU8 = NonSpecificU8<{ u8::MAX }>;
+
 /* definitions */
 
 /// A 7-bit [unicode scalar value][scalar] (ASCII).
 ///
-/// It can represent every scalar from the [basic latin][0w] subset of thethe  plane 0.
+/// It can represent every scalar from the [basic latin][0w] subset of the plane 0.
+///
+/// `Option<Char7>` is the same size as `Char7`.
 ///
 /// See also: [`Char8`], [`Char16`], [`Char24`], [`Char32`], [`char`].
 ///
@@ -22,7 +27,7 @@ mod tests;
 /// [0w]: https://en.wikipedia.org/wiki/Basic_Latin_(Unicode_block)
 #[repr(transparent)]
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Char7(u8);
+pub struct Char7(NonMaxU8);
 
 /// An 8-bit [unicode scalar value][scalar].
 ///
