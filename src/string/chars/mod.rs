@@ -4,14 +4,18 @@
 //
 
 use super::Strings;
-use devela::NonSpecificU8;
+use devela::{NonSpecificU16, NonSpecificU8};
 
 mod core_impls;
 mod impls;
 #[cfg(test)]
 mod tests;
 
-pub(crate) type NonMaxU8 = NonSpecificU8<{ u8::MAX }>;
+// This value can't ever be a 7-bit unicode scalar,
+// nor appear in the highest byte of a 24-bit unicode scalar.
+pub(crate) type NonMaxU8 = NonSpecificU8<0xFF>;
+// This is a surrogate UTF-16 code point that can't ever be a unicode scalar.
+pub(crate) type NonSurrogateU16 = NonSpecificU16<0xDFFF>;
 
 /* definitions */
 
@@ -49,27 +53,31 @@ pub struct Char8(u8);
 /// the first and most important plane in the Unicode standard (also known as
 /// plane 0), containing nearly all commonly used writing systems and symbols.
 ///
+/// `Option<Char16>` is the same size as `Char16`.
+///
 /// See also: [`Char7`], [`Char8`], [`Char24`], [`Char32`], [`char`].
 ///
 /// [scalar]: https://www.unicode.org/glossary/#unicode_scalar_value
 /// [0w]: https://en.wikipedia.org/wiki/Plane_(Unicode)#Basic_Multilingual_Plane
 #[repr(transparent)]
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Char16(u16);
+pub struct Char16(NonSurrogateU16);
 
 /// A 24-bit [unicode scalar value][scalar].
 ///
 /// It can represent each and every scalar the same as [`Char32`],
 /// since the maximum value (`\u{10FFFF}`) needs only 21 bits.
 ///
+/// `Option<Char24>` is the same size as `Char24`.
+///
 /// See also: [`Char7`], [`Char8`], [`Char16`], [`Char32`], [`char`].
 ///
 /// [scalar]: https://www.unicode.org/glossary/#unicode_scalar_value
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Char24 {
-    hi: u8, // highest byte
-    mi: u8, // middle byte
-    lo: u8, // lowest byte
+    hi: NonMaxU8, // highest byte
+    mi: u8,       // middle byte
+    lo: u8,       // lowest byte
 }
 
 /// A 32-bit [unicode scalar value][scalar].

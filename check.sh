@@ -10,4 +10,6 @@ cmd="cargo cn"; echo "no-std, safe\n$" $cmd; $cmd
 cmd="cargo cNu"; echo "no-std, no-alloc, unsafe\n$" $cmd; $cmd
 
 cmd="cargo t"; echo "tests\n$" $cmd; $cmd
+cmd="cargo tu"; echo "tests\n$" $cmd; $cmd
+
 cmd="cargo +nightly nd"; echo "docs\n$" $cmd; $cmd

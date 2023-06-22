@@ -1,6 +1,6 @@
 // textos::string::chars::core_impls
 
-use super::{Char16, Char24, Char32, Char7, Char8, NonMaxU8};
+use super::{Char16, Char24, Char32, Char7, Char8, NonMaxU8, NonSurrogateU16};
 use crate::error::{TextosError, TextosResult as Result};
 use core::fmt;
 use devela::paste;
@@ -54,8 +54,8 @@ macro_rules! core_impls {
 core_impls![Char:
     7+Self(NonMaxU8::new(0).unwrap()),
     8+Self(0),
-    16+Self(0),
-    24+Self{hi:0,mi:0,lo:0},
+    16+Self(NonSurrogateU16::new(0).unwrap()),
+    24+Self{ hi: NonMaxU8::new(0).unwrap(), mi: 0, lo: 0 },
     32+Self('\x00')
 ];
 
@@ -156,7 +156,7 @@ impl From<Char16> for Char32 {
 
         // SAFETY: we've already checked we contain a valid char.
         #[cfg(not(feature = "safe"))]
-        return unsafe { Char32(char::from_u32_unchecked(c.0 as u32)) };
+        return unsafe { Char32(char::from_u32_unchecked(c.0.get() as u32)) };
     }
 }
 impl From<Char16> for char {

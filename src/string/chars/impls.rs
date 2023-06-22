@@ -7,6 +7,7 @@
 //   - traits
 //   - const fns
 // - separate implementations
+//   - Char7
 //   - Char8
 //   - Char16
 //   - Char24
@@ -14,7 +15,7 @@
 //   - traits for char
 // - helper fns
 
-use super::{Char16, Char24, Char32, Char7, Char8, Chars, NonMaxU8, Strings};
+use super::{Char16, Char24, Char32, Char7, Char8, Chars, NonMaxU8, NonSurrogateU16, Strings};
 use crate::error::{TextosError, TextosResult as Result};
 use devela::paste;
 
@@ -420,29 +421,30 @@ impl Char16 {
     /// The highest unicode scalar a `Char16` can represent, `'\u{FFFF}'`.
     ///
     /// Note that `'\u{FFFF}'` is a *noncharacter*.
-    pub const MAX: Char16 = Char16(0xFFFF);
+    pub const MAX: Char16 = Char16::new_unchecked(0xFFFF);
 
     /// `U+FFFD REPLACEMENT CHARACTER (�)` is used in Unicode to represent a decoding error.
-    pub const REPLACEMENT_CHARACTER: Char16 = Char16(char::REPLACEMENT_CHARACTER as u32 as u16);
+    pub const REPLACEMENT_CHARACTER: Char16 =
+        Char16::new_unchecked(char::REPLACEMENT_CHARACTER as u32 as u16);
 
     /* conversions */
 
     /// Converts a `Char7` to `Char16`.
     #[inline]
     pub const fn from_char7(c: Char7) -> Char16 {
-        Char16(c.0.get() as u16)
+        Char16::new_unchecked(c.0.get() as u16)
     }
     /// Converts a `Char8` to `Char16`.
     #[inline]
     pub const fn from_char8(c: Char8) -> Char16 {
-        Char16(c.0 as u16)
+        Char16::new_unchecked(c.0 as u16)
     }
     /// Tries to convert a `Char24` to `Char16`.
     #[inline]
     pub const fn try_from_char24(c: Char24) -> Result<Char16> {
         let c = c.to_u32();
         if byte_len(c) == 1 {
-            Ok(Char16(c as u16))
+            Ok(Char16::new_unchecked(c as u16))
         } else {
             Err(TextosError::OutOfBounds)
         }
@@ -456,15 +458,27 @@ impl Char16 {
     #[inline]
     pub const fn try_from_char(c: char) -> Result<Char16> {
         if byte_len(c as u32) <= 2 {
-            Ok(Char16(c as u32 as u16))
+            Ok(Char16::new_unchecked(c as u32 as u16))
         } else {
             Err(TextosError::OutOfBounds)
         }
     }
     const fn from_char_unchecked(c: char) -> Char16 {
-        Char16(c as u32 as u16)
+        Char16::new_unchecked(c as u32 as u16)
     }
-
+    // useful because Option::<T>::unwrap is not yet stable as const fn
+    const fn new_unchecked(value: u16) -> Char16 {
+        #[cfg(feature = "safe")]
+        if let Some(c) = NonSurrogateU16::new(value) {
+            Char16(c)
+        } else {
+            unreachable![]
+        }
+        #[cfg(not(feature = "safe"))]
+        unsafe {
+            Char16(NonSurrogateU16::new_unchecked(value))
+        }
+    }
     //
 
     /// Tries to convert this `Char16` to `Char7`.
@@ -492,7 +506,7 @@ impl Char16 {
     #[rustfmt::skip]
     pub const fn to_char(self) -> char {
         // #[cfg(feature = "safe")]
-        if let Some(c) = char::from_u32(self.0 as u32) { c } else { unreachable![] }
+        if let Some(c) = char::from_u32(self.0.get() as u32) { c } else { unreachable![] }
 
         // WAITING for stable const: https://github.com/rust-lang/rust/issues/89259
         // SAFETY: we've already checked we contain a valid char.
@@ -502,7 +516,7 @@ impl Char16 {
     /// Converts this `Char16` to `u32`.
     #[inline]
     pub const fn to_u32(self) -> u32 {
-        self.0 as u32
+        self.0.get() as u32
     }
 
     //
@@ -534,7 +548,7 @@ impl Char16 {
     /// [0]: https://www.unicode.org/glossary/#noncharacter
     #[inline]
     pub const fn is_noncharacter(self) -> bool {
-        is_noncharacter(self.0 as u32)
+        is_noncharacter(self.0.get() as u32)
     }
 
     /// Returns `true` if this unicode scalar is an [abstract character][0].
@@ -548,7 +562,7 @@ impl Char16 {
     /// Checks if the value is within the ASCII range.
     #[inline]
     pub const fn is_ascii(self) -> bool {
-        self.0 <= 0x7F
+        self.0.get() <= 0x7F
     }
 }
 
@@ -567,7 +581,7 @@ impl Char24 {
     #[inline]
     pub const fn from_char7(c: Char7) -> Char24 {
         Char24 {
-            hi: 0,
+            hi: Self::new_unchecked_hi(0),
             mi: 0,
             lo: c.0.get(),
         }
@@ -576,7 +590,7 @@ impl Char24 {
     #[inline]
     pub const fn from_char8(c: Char8) -> Char24 {
         Char24 {
-            hi: 0,
+            hi: Self::new_unchecked_hi(0),
             mi: 0,
             lo: c.0,
         }
@@ -584,9 +598,13 @@ impl Char24 {
     /// Converts a `Char16` to `Char24`.
     #[inline]
     pub const fn from_char16(c: Char16) -> Char24 {
-        let mi = ((c.0 & 0xFF00) >> 8) as u8;
-        let lo = (c.0 & 0x00FF) as u8;
-        Char24 { hi: 0, mi, lo }
+        let mi = ((c.0.get() & 0xFF00) >> 8) as u8;
+        let lo = (c.0.get() & 0x00FF) as u8;
+        Char24 {
+            hi: Self::new_unchecked_hi(0),
+            mi,
+            lo,
+        }
     }
     /// Converts a `Char32` to `Char24`.
     #[inline]
@@ -599,7 +617,24 @@ impl Char24 {
         let hi = ((c as u32 & 0x001F0000) >> 16) as u8;
         let mi = ((c as u32 & 0x0000FF00) >> 8) as u8;
         let lo = (c as u32 & 0x000000FF) as u8;
-        Char24 { hi, mi, lo }
+        Char24 {
+            hi: Self::new_unchecked_hi(hi),
+            mi,
+            lo,
+        }
+    }
+    // useful because Option::<T>::unwrap is not yet stable as const fn
+    const fn new_unchecked_hi(value: u8) -> NonMaxU8 {
+        #[cfg(feature = "safe")]
+        if let Some(c) = NonMaxU8::new(value) {
+            c
+        } else {
+            unreachable![]
+        }
+        #[cfg(not(feature = "safe"))]
+        unsafe {
+            NonMaxU8::new_unchecked(value)
+        }
     }
 
     //
@@ -627,7 +662,7 @@ impl Char24 {
     /// Converts this `Char24` to `u32`.
     #[inline]
     pub const fn to_u32(self) -> u32 {
-        (self.hi as u32) << 16 | (self.mi as u32) << 8 | (self.lo as u32)
+        (self.hi.get() as u32) << 16 | (self.mi as u32) << 8 | (self.lo as u32)
     }
     /// Converts this `Char24` to `char`.
     #[inline]
@@ -905,7 +940,7 @@ const fn is_noncharacter(code: u32) -> bool {
         || (code >= 0xFFFE && (code & 0xFF) == 0xFF)
         // unallocated range (16 potential non-characters):
         || (code >= 0x2FE0 && code <= 0x2FEF)
-    // surrogates (FDDO-FDEF) are already filtered out in `char`.
+    // surrogates (0xD800..=0xDFFF) are already filtered out in `char`.
 }
 
 #[inline]
