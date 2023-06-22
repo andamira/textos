@@ -6,6 +6,7 @@
 mod chars;
 mod counter;
 mod non_nul;
+mod strings;
 mod u8string;
 
 pub use all::*;
@@ -14,6 +15,7 @@ pub(crate) mod all {
     pub use super::{
         chars::{Char16, Char24, Char32, Char8, Chars},
         non_nul::*,
+        strings::Strings,
         u8string::*,
     };
 

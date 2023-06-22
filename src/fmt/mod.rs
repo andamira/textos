@@ -10,6 +10,7 @@ mod int_buf;
 pub use all::*;
 pub(super) mod all {
     #[doc(inline)]
+    #[cfg(feature = "alloc")]
     pub use super::indent::indent;
 
     #[doc(inline)]

@@ -192,3 +192,32 @@ impl From<Char32> for char {
         c.0
     }
 }
+
+/* From char */
+
+impl TryFrom<char> for Char8 {
+    type Error = TextosError;
+    #[inline]
+    fn try_from(c: char) -> Result<Char8> {
+        Char8::try_from_char(c)
+    }
+}
+impl TryFrom<char> for Char16 {
+    type Error = TextosError;
+    #[inline]
+    fn try_from(c: char) -> Result<Char16> {
+        Char16::try_from_char(c)
+    }
+}
+impl From<char> for Char24 {
+    #[inline]
+    fn from(c: char) -> Char24 {
+        Char24::from_char(c)
+    }
+}
+impl From<char> for Char32 {
+    #[inline]
+    fn from(c: char) -> Char32 {
+        Char32(c)
+    }
+}
