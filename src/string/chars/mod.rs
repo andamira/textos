@@ -23,7 +23,7 @@ pub(crate) type NonSurrogateU16 = NonSpecificU16<0xDFFF>;
 ///
 /// It can represent every scalar from the [basic latin][0w] subset of the plane 0.
 ///
-/// `Option<Char7>` is the same size as `Char7`.
+/// `Option<Char7>` is the same size as `Char7` or `Char8` (1 byte).
 ///
 /// See also: [`Char8`], [`Char16`], [`Char24`], [`Char32`], [`char`].
 ///
@@ -37,6 +37,11 @@ pub struct Char7(NonMaxU8);
 ///
 /// It can represent every scalar from the [basic latin][0w] and
 /// [latin-1 supplement][1w] subsets of the plane 0.
+///
+/// This is the only scalar type without memory layout optimization
+/// since each possible value is a valid unicode scalar. Therefore
+/// `Option<Char8>` is the same size as `Char16` or `Option<Char16>` (2 bytes).
+///
 ///
 /// See also: [`Char7`], [`Char16`], [`Char24`], [`Char32`], [`char`].
 ///
@@ -53,7 +58,7 @@ pub struct Char8(u8);
 /// the first and most important plane in the Unicode standard (also known as
 /// plane 0), containing nearly all commonly used writing systems and symbols.
 ///
-/// `Option<Char16>` is the same size as `Char16`.
+/// `Option<Char16>` is the same size as `Char16` (2 bytes).
 ///
 /// See also: [`Char7`], [`Char8`], [`Char24`], [`Char32`], [`char`].
 ///
@@ -68,7 +73,7 @@ pub struct Char16(NonSurrogateU16);
 /// It can represent each and every scalar the same as [`Char32`],
 /// since the maximum value (`\u{10FFFF}`) needs only 21 bits.
 ///
-/// `Option<Char24>` is the same size as `Char24`.
+/// `Option<Char24>` is the same size as `Char24` (3 bytes).
 ///
 /// See also: [`Char7`], [`Char8`], [`Char16`], [`Char32`], [`char`].
 ///
@@ -84,6 +89,8 @@ pub struct Char24 {
 ///
 /// This is the default unicode scalar type in Rust. It can represent the same
 /// range of unicode scalars as [`Char24`].
+///
+/// `Option<Char32>` is the same size as `Char32` or `char` (4 bytes).
 ///
 /// See also: [`Char7`], [`Char8`], [`Char16`], [`Char24`], [`char`].
 ///
