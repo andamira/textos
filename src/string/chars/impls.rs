@@ -130,6 +130,11 @@ impl Char8 {
 
     /* conversions */
 
+    #[inline]
+    pub(crate) const fn to_u32(self) -> u32 {
+        self.0 as u32
+    }
+
     /// Converts this `Char8` to a `Char32`.
     #[inline]
     #[rustfmt::skip]
@@ -206,13 +211,18 @@ impl Char16 {
 
     /// The highest unicode scalar a `Char16` can represent, `'\u{FFFF}'`.
     ///
-    /// Note that '\u{FFFF}' is a *noncharacter*.
+    /// Note that `'\u{FFFF}'` is a *noncharacter*.
     pub const MAX: Char16 = Char16(0xFFFF);
 
     /// `U+FFFD REPLACEMENT CHARACTER (�)` is used in Unicode to represent a decoding error.
     pub const REPLACEMENT_CHARACTER: Char16 = Char16(char::REPLACEMENT_CHARACTER as u32 as u16);
 
     /* conversions */
+
+    #[inline]
+    pub(crate) const fn to_u32(self) -> u32 {
+        self.0 as u32
+    }
 
     /// Converts this `Char16` to a `Char32`.
     #[inline]
@@ -296,9 +306,8 @@ impl Char24 {
 
     /* conversions */
 
-    // helper
     #[inline]
-    const fn to_u32(self) -> u32 {
+    pub(crate) const fn to_u32(self) -> u32 {
         (self.0[0] as u32) << 16 | (self.0[1] as u32) << 8 | (self.0[2] as u32)
     }
 

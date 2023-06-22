@@ -29,6 +29,26 @@ macro_rules! core_impls {
                 write!(f, "{:?}", self.to_char32())
             }
         }
+        impl fmt::Binary for [<$name $bits>] {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                fmt::Binary::fmt(&self.to_u32(), f)
+            }
+        }
+        impl fmt::LowerHex for [<$name $bits>] {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                fmt::LowerHex::fmt(&self.to_u32(), f)
+            }
+        }
+        impl fmt::UpperHex for [<$name $bits>] {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                fmt::UpperHex::fmt(&self.to_u32(), f)
+            }
+        }
+        impl fmt::Octal for [<$name $bits>] {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                fmt::Octal::fmt(&self.to_u32(), f)
+            }
+        }
     }};
 }
 core_impls![Char: 8+0, 16+0, 24+[0,0,0]];
