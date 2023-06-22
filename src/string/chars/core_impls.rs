@@ -1,6 +1,6 @@
 // textos::string::chars::core_impls
 
-use super::{Char16, Char24, Char32, Char8};
+use super::{Char16, Char24, Char32, Char7, Char8};
 use crate::error::{TextosError, TextosResult as Result};
 use core::fmt;
 use devela::paste;
@@ -51,10 +51,50 @@ macro_rules! core_impls {
         }
     }};
 }
-core_impls![Char: 8+0, 16+0, 24+[0,0,0], 32+'\x00'];
+core_impls![Char: 7+0, 8+0, 16+0, 24+[0,0,0], 32+'\x00'];
+
+/* From Char7 */
+
+impl From<Char7> for Char8 {
+    #[inline]
+    fn from(c: Char7) -> Char8 {
+        c.to_char8()
+    }
+}
+impl From<Char7> for Char16 {
+    #[inline]
+    fn from(c: Char7) -> Char16 {
+        c.to_char16()
+    }
+}
+impl From<Char7> for Char24 {
+    #[inline]
+    fn from(c: Char7) -> Char24 {
+        c.to_char24()
+    }
+}
+impl From<Char7> for Char32 {
+    #[inline]
+    fn from(c: Char7) -> Char32 {
+        c.to_char32()
+    }
+}
+impl From<Char7> for char {
+    #[inline]
+    fn from(c: Char7) -> char {
+        c.to_char()
+    }
+}
 
 /* From Char8 */
 
+impl TryFrom<Char8> for Char7 {
+    type Error = TextosError;
+    #[inline]
+    fn try_from(c: Char8) -> Result<Char7> {
+        c.try_to_char7()
+    }
+}
 impl From<Char8> for Char16 {
     #[inline]
     fn from(c: Char8) -> Char16 {
@@ -82,6 +122,13 @@ impl From<Char8> for char {
 
 /* From Char16 */
 
+impl TryFrom<Char16> for Char7 {
+    type Error = TextosError;
+    #[inline]
+    fn try_from(c: Char16) -> Result<Char7> {
+        c.try_to_char7()
+    }
+}
 impl TryFrom<Char16> for Char8 {
     type Error = TextosError;
     #[inline]
@@ -115,6 +162,13 @@ impl From<Char16> for char {
 
 /* From Char24 */
 
+impl TryFrom<Char24> for Char7 {
+    type Error = TextosError;
+    #[inline]
+    fn try_from(c: Char24) -> Result<Char7> {
+        c.try_to_char7()
+    }
+}
 impl TryFrom<Char24> for Char8 {
     type Error = TextosError;
     #[inline]
@@ -149,6 +203,13 @@ impl From<Char24> for char {
 
 /* From Char32 */
 
+impl TryFrom<Char32> for Char7 {
+    type Error = TextosError;
+    #[inline]
+    fn try_from(c: Char32) -> Result<Char7> {
+        c.try_to_char7()
+    }
+}
 impl TryFrom<Char32> for Char8 {
     type Error = TextosError;
     #[inline]
@@ -178,6 +239,13 @@ impl From<Char32> for char {
 
 /* From char */
 
+impl TryFrom<char> for Char7 {
+    type Error = TextosError;
+    #[inline]
+    fn try_from(c: char) -> Result<Char7> {
+        Char7::try_from_char(c)
+    }
+}
 impl TryFrom<char> for Char8 {
     type Error = TextosError;
     #[inline]

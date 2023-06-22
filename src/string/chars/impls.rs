@@ -14,7 +14,7 @@
 //   - traits for char
 // - helper fns
 
-use super::{Char16, Char24, Char32, Char8, Chars, Strings};
+use super::{Char16, Char24, Char32, Char7, Char8, Chars, Strings};
 use crate::error::{TextosError, TextosResult as Result};
 use devela::paste;
 
@@ -124,10 +124,148 @@ macro_rules! impls {
         }
     }};
 }
-impls![Char: 8, 16, 24, 32];
+impls![Char: 7, 8, 16, 24, 32];
 
 /* separate implementations */
 
+impl Char7 {
+    /* constants */
+
+    /// The highest unicode scalar a `Char7` can represent, `'\u{7F}'`.
+    pub const MAX: Char7 = Char7(0x7F);
+
+    /* conversions */
+
+    /// Tries to convert a `Char8` to `Char7`.
+    #[inline]
+    pub const fn try_from_char8(c: Char8) -> Result<Char7> {
+        if is_7bit(c.to_u32()) {
+            Ok(Char7(c.to_u32() as u8))
+        } else {
+            Err(TextosError::OutOfBounds)
+        }
+    }
+    /// Tries to convert a `Char16` to `Char7`.
+    #[inline]
+    pub const fn try_from_char16(c: Char16) -> Result<Char7> {
+        if is_7bit(c.to_u32()) {
+            Ok(Char7(c.to_u32() as u8))
+        } else {
+            Err(TextosError::OutOfBounds)
+        }
+    }
+    /// Tries to convert a `Char24` to `Char7`.
+    #[inline]
+    pub const fn try_from_char24(c: Char24) -> Result<Char7> {
+        let c = c.to_u32();
+        if is_7bit(c) {
+            Ok(Char7(c as u8))
+        } else {
+            Err(TextosError::OutOfBounds)
+        }
+    }
+    /// Tries to convert a `Char32` to `Char8`.
+    #[inline]
+    pub const fn try_from_char32(c: Char32) -> Result<Char7> {
+        if is_7bit(c.to_u32()) {
+            Ok(Char7(c.to_u32() as u8))
+        } else {
+            Err(TextosError::OutOfBounds)
+        }
+    }
+    /// Tries to convert a `char` to `Char8`.
+    #[inline]
+    pub const fn try_from_char(c: char) -> Result<Char7> {
+        if is_7bit(c as u32) {
+            Ok(Char7(c as u32 as u8))
+        } else {
+            Err(TextosError::OutOfBounds)
+        }
+    }
+    const fn from_char_unchecked(c: char) -> Char7 {
+        Char7(c as u32 as u8)
+    }
+
+    //
+
+    /// Converts this `Char7` to `Char8`.
+    #[inline]
+    pub const fn to_char8(self) -> Char8 {
+        Char8::from_char7(self)
+    }
+    /// Converts this `Char7` to `Char16`.
+    #[inline]
+    pub const fn to_char16(self) -> Char16 {
+        Char16::from_char7(self)
+    }
+    /// Converts this `Char7` to `Char24`.
+    #[inline]
+    pub const fn to_char24(self) -> Char24 {
+        Char24::from_char7(self)
+    }
+    /// Converts this `Char7` to `Char32`.
+    #[inline]
+    pub const fn to_char32(self) -> Char32 {
+        Char32::from_char7(self)
+    }
+    /// Converts this `Char7` to `char`.
+    #[inline]
+    #[rustfmt::skip]
+    pub const fn to_char(self) -> char {
+        self.0 as char
+    }
+    /// Converts this `Char7` to `u32`.
+    #[inline]
+    pub const fn to_u32(self) -> u32 {
+        self.0 as u32
+    }
+
+    //
+
+    /* queries */
+
+    /// Returns `true` if this unicode scalar is a [noncharacter][0].
+    ///
+    /// [0]: https://www.unicode.org/glossary/#noncharacter
+    #[inline]
+    pub const fn is_noncharacter(self) -> bool {
+        false
+    }
+
+    /// Returns `true` if this unicode scalar is an [abstract character][0].
+    ///
+    /// [0]: https://www.unicode.org/glossary/#abstract_character
+    #[inline]
+    pub const fn is_character(self) -> bool {
+        true
+    }
+
+    /// Checks if the value is within the ASCII range.
+    #[inline]
+    pub const fn is_ascii(self) -> bool {
+        true
+    }
+
+    /// Makes a copy of the value in its ASCII upper case equivalent.
+    ///
+    /// ASCII letters ‘a’ to ‘z’ are mapped to ‘A’ to ‘Z’, but non-ASCII letters
+    /// are unchanged.
+    #[inline]
+    #[rustfmt::skip]
+    pub const fn to_ascii_uppercase(self) -> Char7 {
+        Self::from_char_unchecked(char::to_ascii_uppercase(&self.to_char()))
+    }
+
+    /// Makes a copy of the value in its ASCII lower case equivalent.
+    ///
+    /// ASCII letters ‘A’ to ‘Z’ are mapped to ‘a’ to ‘z’, but non-ASCII letters
+    /// are unchanged.
+    #[inline]
+    #[rustfmt::skip]
+    pub const fn to_ascii_lowercase(self) -> Char7 {
+        Self::from_char_unchecked(char::to_ascii_lowercase(&self.to_char()))
+    }
+}
 impl Char8 {
     /* constants */
 
@@ -136,6 +274,11 @@ impl Char8 {
 
     /* conversions */
 
+    /// Converts a `Char7` to `Char8`.
+    #[inline]
+    pub const fn from_char7(c: Char7) -> Char8 {
+        Self(c.0)
+    }
     /// Tries to convert a `Char16` to `Char8`.
     #[inline]
     pub const fn try_from_char16(c: Char16) -> Result<Char8> {
@@ -179,6 +322,11 @@ impl Char8 {
 
     //
 
+    /// Tries to convert this `Char8` to `Char7`.
+    #[inline]
+    pub const fn try_to_char7(self) -> Result<Char7> {
+        Char7::try_from_char8(self)
+    }
     /// Converts this `Char8` to `Char16`.
     #[inline]
     pub const fn to_char16(self) -> Char16 {
@@ -266,6 +414,11 @@ impl Char16 {
 
     /* conversions */
 
+    /// Converts a `Char7` to `Char16`.
+    #[inline]
+    pub const fn from_char7(c: Char7) -> Char16 {
+        Char16(c.0 as u16)
+    }
     /// Converts a `Char8` to `Char16`.
     #[inline]
     pub const fn from_char8(c: Char8) -> Char16 {
@@ -301,6 +454,11 @@ impl Char16 {
 
     //
 
+    /// Tries to convert this `Char16` to `Char7`.
+    #[inline]
+    pub const fn try_to_char7(self) -> Result<Char7> {
+        Char7::try_from_char16(self)
+    }
     /// Tries to convert this `Char16` to `Char8`.
     #[inline]
     pub const fn try_to_char8(self) -> Result<Char8> {
@@ -392,6 +550,11 @@ impl Char24 {
 
     /* conversions */
 
+    /// Converts a `Char7` to `Char24`.
+    #[inline]
+    pub const fn from_char7(c: Char7) -> Char24 {
+        Char24([0, 0, c.0])
+    }
     /// Converts a `Char8` to `Char24`.
     #[inline]
     pub const fn from_char8(c: Char8) -> Char24 {
@@ -420,6 +583,11 @@ impl Char24 {
 
     //
 
+    /// Tries to convert this `Char24` to `Char7`.
+    #[inline]
+    pub const fn try_to_char7(self) -> Result<Char7> {
+        Char7::try_from_char24(self)
+    }
     /// Tries to convert this `Char24` to `Char8`.
     #[inline]
     pub const fn try_to_char8(self) -> Result<Char8> {
@@ -511,6 +679,11 @@ impl Char32 {
 
     /* conversions */
 
+    /// Converts a `Char7` to `Char32`.
+    #[inline]
+    pub const fn from_char7(c: Char7) -> Char32 {
+        Char32(c.to_char())
+    }
     /// Converts a `Char8` to `Char32`.
     #[inline]
     pub const fn from_char8(c: Char8) -> Char32 {
@@ -534,6 +707,11 @@ impl Char32 {
 
     //
 
+    /// Tries to convert this `Char32` to `Char7`.
+    #[inline]
+    pub const fn try_to_char7(self) -> Result<Char7> {
+        Char7::try_from_char32(self)
+    }
     /// Tries to convert this `Char32` to `Char8`.
     #[inline]
     pub const fn try_to_char8(self) -> Result<Char8> {
@@ -716,4 +894,8 @@ const fn byte_len(code: u32) -> usize {
         0x100..=0xFFFF => 2,
         _ => 3,
     }
+}
+#[inline]
+const fn is_7bit(code: u32) -> bool {
+    code <= 0x7F
 }

@@ -12,12 +12,24 @@ mod tests;
 
 /* definitions */
 
+/// A 7-bit [unicode scalar value][scalar] (ASCII).
+///
+/// It can represent every scalar from the [basic latin][0w] subset of thethe  plane 0.
+///
+/// See also: [`Char8`], [`Char16`], [`Char24`], [`Char32`], [`char`].
+///
+/// [scalar]: https://www.unicode.org/glossary/#unicode_scalar_value
+/// [0w]: https://en.wikipedia.org/wiki/Basic_Latin_(Unicode_block)
+#[repr(transparent)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Char7(u8);
+
 /// An 8-bit [unicode scalar value][scalar].
 ///
 /// It can represent every scalar from the [basic latin][0w] and
 /// [latin-1 supplement][1w] subsets of the plane 0.
 ///
-/// See also: [`Char16`], [`Char24`], [`Char32`].
+/// See also: [`Char7`], [`Char16`], [`Char24`], [`Char32`], [`char`].
 ///
 /// [scalar]: https://www.unicode.org/glossary/#unicode_scalar_value
 /// [0w]: https://en.wikipedia.org/wiki/Basic_Latin_(Unicode_block)
@@ -32,7 +44,7 @@ pub struct Char8(u8);
 /// the first and most important plane in the Unicode standard (also known as
 /// plane 0), containing nearly all commonly used writing systems and symbols.
 ///
-/// See also: [`Char8`], [`Char24`], [`Char32`].
+/// See also: [`Char7`], [`Char8`], [`Char24`], [`Char32`], [`char`].
 ///
 /// [scalar]: https://www.unicode.org/glossary/#unicode_scalar_value
 /// [0w]: https://en.wikipedia.org/wiki/Plane_(Unicode)#Basic_Multilingual_Plane
@@ -45,7 +57,7 @@ pub struct Char16(u16);
 /// It can represent each and every scalar the same as [`Char32`],
 /// since the maximum value (`\u{10FFFF}`) needs only 21 bits.
 ///
-/// See also: [`Char8`], [`Char16`], [`Char32`].
+/// See also: [`Char7`], [`Char8`], [`Char16`], [`Char32`], [`char`].
 ///
 /// [scalar]: https://www.unicode.org/glossary/#unicode_scalar_value
 //
@@ -59,7 +71,7 @@ pub struct Char24([u8; 3]);
 /// This is the default unicode scalar type in Rust. It can represent the same
 /// range of unicode scalars as [`Char24`].
 ///
-/// See also: [`Char8`], [`Char16`], [`Char24`].
+/// See also: [`Char7`], [`Char8`], [`Char16`], [`Char24`], [`char`].
 ///
 /// [scalar]: https://www.unicode.org/glossary/#unicode_scalar_value
 #[repr(transparent)]
