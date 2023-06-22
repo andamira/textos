@@ -58,25 +58,25 @@ core_impls![Char: 8+0, 16+0, 24+[0,0,0], 32+'\x00'];
 impl From<Char8> for Char16 {
     #[inline]
     fn from(c: Char8) -> Char16 {
-        Char16(c.0.into())
+        c.to_char16()
     }
 }
 impl From<Char8> for Char24 {
     #[inline]
     fn from(c: Char8) -> Char24 {
-        Char24([c.0, 0, 0])
+        c.to_char24()
     }
 }
 impl From<Char8> for Char32 {
     #[inline]
     fn from(c: Char8) -> Char32 {
-        Char32(c.0.into())
+        c.to_char32()
     }
 }
 impl From<Char8> for char {
     #[inline]
     fn from(c: Char8) -> char {
-        c.0.into()
+        c.to_char()
     }
 }
 
@@ -86,25 +86,20 @@ impl TryFrom<Char16> for Char8 {
     type Error = TextosError;
     #[inline]
     fn try_from(c: Char16) -> Result<Char8> {
-        if c.0 <= u8::MAX as u16 {
-            Ok(Char8(c.0 as u8))
-        } else {
-            Err(TextosError::OutOfBounds)
-        }
+        c.try_to_char8()
     }
 }
 impl From<Char16> for Char24 {
     #[inline]
     fn from(c: Char16) -> Char24 {
-        let (b0, b1) = (((c.0 & 0xFF00) >> 8) as u8, (c.0 & 0x00FF) as u8);
-        Char24([b0, b1, 0])
+        c.to_char24()
     }
 }
 impl From<Char16> for Char32 {
     #[inline]
     fn from(c: Char16) -> Char32 {
         #[cfg(feature = "safe")]
-        return Char32(char::from_u32(c.0 as u32).unwrap());
+        return c.to_char32();
 
         // SAFETY: we've already checked we contain a valid char.
         #[cfg(not(feature = "safe"))]
@@ -124,37 +119,25 @@ impl TryFrom<Char24> for Char8 {
     type Error = TextosError;
     #[inline]
     fn try_from(c: Char24) -> Result<Char8> {
-        let code_point = (c.0[0] as u32) << 16 | (c.0[1] as u32) << 8 | (c.0[2] as u32);
-        if code_point <= u8::MAX as u32 {
-            Ok(Char8(code_point as u8))
-        } else {
-            Err(TextosError::OutOfBounds)
-        }
+        c.try_to_char8()
     }
 }
 impl TryFrom<Char24> for Char16 {
     type Error = TextosError;
     #[inline]
     fn try_from(c: Char24) -> Result<Char16> {
-        let code_point = (c.0[0] as u32) << 16 | (c.0[1] as u32) << 8 | (c.0[2] as u32);
-        if code_point <= u16::MAX as u32 {
-            Ok(Char16(code_point as u16))
-        } else {
-            Err(TextosError::OutOfBounds)
-        }
+        c.try_to_char16()
     }
 }
 impl From<Char24> for Char32 {
     #[inline]
     fn from(c: Char24) -> Char32 {
-        let code_point = (c.0[0] as u32) << 16 | (c.0[1] as u32) << 8 | (c.0[2] as u32);
-
         #[cfg(feature = "safe")]
-        return Char32(char::from_u32(code_point).unwrap());
+        return c.to_char32();
 
         // SAFETY: we've already checked we contain a valid char.
         #[cfg(not(feature = "safe"))]
-        return unsafe { Char32(char::from_u32_unchecked(code_point)) };
+        return unsafe { Char32(char::from_u32_unchecked(c.to_u32())) };
     }
 }
 impl From<Char24> for char {
@@ -170,26 +153,26 @@ impl TryFrom<Char32> for Char8 {
     type Error = TextosError;
     #[inline]
     fn try_from(c: Char32) -> Result<Char8> {
-        Char8::try_from_char(c.0)
+        c.try_to_char8()
     }
 }
 impl TryFrom<Char32> for Char16 {
     type Error = TextosError;
     #[inline]
     fn try_from(c: Char32) -> Result<Char16> {
-        Char16::try_from_char(c.0)
+        c.try_to_char16()
     }
 }
 impl From<Char32> for Char24 {
     #[inline]
     fn from(c: Char32) -> Char24 {
-        Char24::from_char(c.0)
+        c.to_char24()
     }
 }
 impl From<Char32> for char {
     #[inline]
     fn from(c: Char32) -> char {
-        c.0
+        c.to_char()
     }
 }
 
@@ -218,6 +201,6 @@ impl From<char> for Char24 {
 impl From<char> for Char32 {
     #[inline]
     fn from(c: char) -> Char32 {
-        Char32(c)
+        Char32::from_char(c)
     }
 }

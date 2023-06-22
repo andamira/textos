@@ -36,6 +36,8 @@ macro_rules! impls {
             /* encode */
 
             #[inline]
+            fn byte_len(self) -> usize { self.byte_len() }
+            #[inline]
             fn len_utf8(self) -> usize { self.len_utf8() }
             #[inline]
             fn len_utf16(self) -> usize { self.len_utf16() }
@@ -86,6 +88,9 @@ macro_rules! impls {
 
             /* encode */
 
+            /// Returns the number of bytes needed to represent the scalar value.
+            pub const fn byte_len(self) -> usize { byte_len(self.to_u32()) }
+
             /// Returns the number of bytes needed to encode in UTF-8.
             #[inline]
             pub const fn len_utf8(self) -> usize { self.to_char().len_utf8() }
@@ -131,23 +136,38 @@ impl Char8 {
 
     /* conversions */
 
-    /// Converts this `Char8` to `u32`.
+    /// Tries to convert a `Char16` to `Char8`.
     #[inline]
-    pub const fn to_u32(self) -> u32 {
-        self.0 as u32
+    pub const fn try_from_char16(c: Char16) -> Result<Char8> {
+        if byte_len(c.to_u32()) == 1 {
+            Ok(Char8(c.to_u32() as u8))
+        } else {
+            Err(TextosError::OutOfBounds)
+        }
     }
-
-    /// Converts this `Char8` to `char`.
+    /// Tries to convert a `Char24` to `Char8`.
     #[inline]
-    #[rustfmt::skip]
-    pub const fn to_char(self) -> char {
-        self.0 as char
+    pub const fn try_from_char24(c: Char24) -> Result<Char8> {
+        let c = c.to_u32();
+        if byte_len(c) == 1 {
+            Ok(Char8(c as u8))
+        } else {
+            Err(TextosError::OutOfBounds)
+        }
     }
-
-    /// Tries to convert a `Char32` to a `Char8`.
+    /// Tries to convert a `Char32` to `Char8`.
+    #[inline]
+    pub const fn try_from_char32(c: Char32) -> Result<Char8> {
+        if byte_len(c.to_u32()) == 1 {
+            Ok(Char8(c.to_u32() as u8))
+        } else {
+            Err(TextosError::OutOfBounds)
+        }
+    }
+    /// Tries to convert a `char` to `Char8`.
     #[inline]
     pub const fn try_from_char(c: char) -> Result<Char8> {
-        if c as u32 <= Self::MAX.0 as u32 {
+        if byte_len(c as u32) == 1 {
             Ok(Char8(c as u32 as u8))
         } else {
             Err(TextosError::OutOfBounds)
@@ -156,6 +176,37 @@ impl Char8 {
     const fn from_char_unchecked(c: char) -> Char8 {
         Char8(c as u32 as u8)
     }
+
+    //
+
+    /// Converts this `Char8` to `Char16`.
+    #[inline]
+    pub const fn to_char16(self) -> Char16 {
+        Char16::from_char8(self)
+    }
+    /// Converts this `Char8` to `Char24`.
+    #[inline]
+    pub const fn to_char24(self) -> Char24 {
+        Char24::from_char8(self)
+    }
+    /// Converts this `Char8` to `Char32`.
+    #[inline]
+    pub const fn to_char32(self) -> Char32 {
+        Char32::from_char8(self)
+    }
+    /// Converts this `Char8` to `char`.
+    #[inline]
+    #[rustfmt::skip]
+    pub const fn to_char(self) -> char {
+        self.0 as char
+    }
+    /// Converts this `Char8` to `u32`.
+    #[inline]
+    pub const fn to_u32(self) -> u32 {
+        self.0 as u32
+    }
+
+    //
 
     /* queries */
 
@@ -215,12 +266,56 @@ impl Char16 {
 
     /* conversions */
 
-    /// Converts this `Char16` to `u32`.
+    /// Converts a `Char8` to `Char16`.
     #[inline]
-    pub const fn to_u32(self) -> u32 {
-        self.0 as u32
+    pub const fn from_char8(c: Char8) -> Char16 {
+        Char16(c.0 as u16)
+    }
+    /// Tries to convert a `Char24` to `Char16`.
+    #[inline]
+    pub const fn try_from_char24(c: Char24) -> Result<Char16> {
+        let c = c.to_u32();
+        if byte_len(c) == 1 {
+            Ok(Char16(c as u16))
+        } else {
+            Err(TextosError::OutOfBounds)
+        }
+    }
+    /// Tries to convert a `Char32` to `Char16`.
+    #[inline]
+    pub const fn try_from_char32(c: Char32) -> Result<Char16> {
+        Self::try_from_char(c.to_char())
+    }
+    /// Tries to convert a `char` to `Char16`.
+    #[inline]
+    pub const fn try_from_char(c: char) -> Result<Char16> {
+        if byte_len(c as u32) <= 2 {
+            Ok(Char16(c as u32 as u16))
+        } else {
+            Err(TextosError::OutOfBounds)
+        }
+    }
+    const fn from_char_unchecked(c: char) -> Char16 {
+        Char16(c as u32 as u16)
     }
 
+    //
+
+    /// Tries to convert this `Char16` to `Char8`.
+    #[inline]
+    pub const fn try_to_char8(self) -> Result<Char8> {
+        Char8::try_from_char16(self)
+    }
+    /// Converts this `Char16` to `Char24`.
+    #[inline]
+    pub const fn to_char24(self) -> Char24 {
+        Char24::from_char16(self)
+    }
+    /// Converts this `Char16` to `Char32`.
+    #[inline]
+    pub const fn to_char32(self) -> Char32 {
+        Char32::from_char16(self)
+    }
     /// Converts this `Char16` to `char`.
     #[inline]
     #[rustfmt::skip]
@@ -233,19 +328,13 @@ impl Char16 {
         // #[cfg(not(feature = "safe"))]
         // return unsafe { char::from_u32_unchecked(self.0 as u32) };
     }
-
-    /// Tries to convert a `Char32` to a `Char16`.
+    /// Converts this `Char16` to `u32`.
     #[inline]
-    pub const fn try_from_char(c: char) -> Result<Char16> {
-        if c as u32 <= Self::MAX.0 as u32 {
-            Ok(Char16(c as u32 as u16))
-        } else {
-            Err(TextosError::OutOfBounds)
-        }
+    pub const fn to_u32(self) -> u32 {
+        self.0 as u32
     }
-    const fn from_char_unchecked(c: char) -> Char16 {
-        Char16(c as u32 as u16)
-    }
+
+    //
 
     /// Makes a copy of the value in its ASCII upper case equivalent.
     ///
@@ -303,12 +392,54 @@ impl Char24 {
 
     /* conversions */
 
+    /// Converts a `Char8` to `Char24`.
+    #[inline]
+    pub const fn from_char8(c: Char8) -> Char24 {
+        Char24([0, 0, c.0])
+    }
+    /// Converts a `Char16` to `Char24`.
+    #[inline]
+    pub const fn from_char16(c: Char16) -> Char24 {
+        let b0 = (c.0 & 0x00FF) as u8;
+        let b1 = ((c.0 & 0xFF00) >> 8) as u8;
+        Char24([0, b1, b0])
+    }
+    /// Converts a `Char32` to `Char24`.
+    #[inline]
+    pub const fn from_char32(c: Char32) -> Char24 {
+        Char24::from_char(c.0)
+    }
+    /// Converts a `char` to `Char24`.
+    #[inline]
+    pub const fn from_char(c: char) -> Char24 {
+        let b0 = (c as u32 & 0x000000FF) as u8;
+        let b1 = ((c as u32 & 0x0000FF00) >> 8) as u8;
+        let b2 = ((c as u32 & 0x001F0000) >> 16) as u8;
+        Char24([b2, b1, b0])
+    }
+
+    //
+
+    /// Tries to convert this `Char24` to `Char8`.
+    #[inline]
+    pub const fn try_to_char8(self) -> Result<Char8> {
+        Char8::try_from_char24(self)
+    }
+    /// Tries to convert this `Char24` to `Char16`.
+    #[inline]
+    pub const fn try_to_char16(self) -> Result<Char16> {
+        Char16::try_from_char24(self)
+    }
+    /// Converts this `Char24` to `Char32`.
+    #[inline]
+    pub const fn to_char32(self) -> Char32 {
+        Char32(self.to_char())
+    }
     /// Converts this `Char24` to `u32`.
     #[inline]
     pub const fn to_u32(self) -> u32 {
         (self.0[0] as u32) << 16 | (self.0[1] as u32) << 8 | (self.0[2] as u32)
     }
-
     /// Converts this `Char24` to `char`.
     #[inline]
     #[rustfmt::skip]
@@ -322,14 +453,7 @@ impl Char24 {
         // return unsafe { char::from_u32_unchecked(code_point) };
     }
 
-    /// Converts a `Char32` to a `Char24`.
-    #[inline]
-    pub const fn from_char(c: char) -> Char24 {
-        let b0 = ((c as u32 & 0x00FF0000) >> 16) as u8;
-        let b1 = ((c as u32 & 0x0000FF00) >> 8) as u8;
-        let b2 = (c as u32 & 0x000000FF) as u8;
-        Char24([b0, b1, b2])
-    }
+    //
 
     /// Makes a copy of the value in its ASCII upper case equivalent.
     ///
@@ -387,23 +511,56 @@ impl Char32 {
 
     /* conversions */
 
-    /// Converts this `Char32` to `u32`.
+    /// Converts a `Char8` to `Char32`.
     #[inline]
-    pub(crate) const fn to_u32(self) -> u32 {
-        self.0 as u32
+    pub const fn from_char8(c: Char8) -> Char32 {
+        Char32(c.to_char())
+    }
+    /// Converts a `Char16` to `Char32`.
+    #[inline]
+    pub const fn from_char16(c: Char16) -> Char32 {
+        Char32(c.to_char())
+    }
+    /// Converts a `Char24` to `Char32`.
+    #[inline]
+    pub const fn from_char24(c: Char24) -> Char32 {
+        Char32(c.to_char())
+    }
+    /// Converts a `char` to `Char32`.
+    #[inline]
+    pub const fn from_char(c: char) -> Char32 {
+        Char32(c)
     }
 
+    //
+
+    /// Tries to convert this `Char32` to `Char8`.
+    #[inline]
+    pub const fn try_to_char8(self) -> Result<Char8> {
+        Char8::try_from_char32(self)
+    }
+    /// Tries to convert this `Char32` to `Char16`.
+    #[inline]
+    pub const fn try_to_char16(self) -> Result<Char16> {
+        Char16::try_from_char32(self)
+    }
+    /// Converts this `Char32` to `Char24`.
+    #[inline]
+    pub const fn to_char24(self) -> Char24 {
+        Char24::from_char32(self)
+    }
     /// Converts this `Char32` to `char`.
     #[inline]
     pub const fn to_char(self) -> char {
         self.0
     }
-
-    /// Converts a `char` to a `Char32`.
+    /// Converts this `Char32` to `u32`.
     #[inline]
-    pub const fn from_char(c: char) -> Char32 {
-        Char32(c)
+    pub const fn to_u32(self) -> u32 {
+        self.0 as u32
     }
+
+    //
 
     /// Makes a copy of the value in its ASCII upper case equivalent.
     ///
@@ -414,7 +571,6 @@ impl Char32 {
     pub const fn to_ascii_uppercase(self) -> Char32 {
         Char32(char::to_ascii_uppercase(&self.0))
     }
-
     /// Makes a copy of the value in its ASCII lower case equivalent.
     ///
     /// ASCII letters ‘A’ to ‘Z’ are mapped to ‘a’ to ‘z’, but non-ASCII letters
@@ -459,6 +615,10 @@ impl Chars for char {
 
     /* encode */
 
+    #[inline]
+    fn byte_len(self) -> usize {
+        byte_len(self as u32)
+    }
     #[inline]
     fn len_utf8(self) -> usize {
         self.len_utf8()
@@ -547,4 +707,13 @@ const fn is_noncharacter(code: u32) -> bool {
         // unallocated range (16 potential non-characters):
         || (code >= 0x2FE0 && code <= 0x2FEF)
     // surrogates (FDDO-FDEF) are already filtered out in `char`.
+}
+
+#[inline]
+const fn byte_len(code: u32) -> usize {
+    match code {
+        0..=0xFF => 1,
+        0x100..=0xFFFF => 2,
+        _ => 3,
+    }
 }

@@ -48,6 +48,8 @@ pub struct Char16(u16);
 /// See also: [`Char8`], [`Char16`], [`Char32`].
 ///
 /// [scalar]: https://www.unicode.org/glossary/#unicode_scalar_value
+//
+// The scalar is internally represented as a little-endian byte array.
 #[repr(transparent)]
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Char24([u8; 3]);
@@ -70,6 +72,9 @@ pub trait Chars: Strings {
     const MAX: Self;
 
     /* encode */
+
+    /// Returns the number of bytes needed to represent the scalar value.
+    fn byte_len(self) -> usize;
 
     /// Returns the number of bytes needed to encode in UTF-8.
     fn len_utf8(self) -> usize;
