@@ -15,13 +15,14 @@ pub use ::unicode_blocks;
 pub use ::unicode_blocks::find_unicode_block;
 
 pub mod char;
-pub mod drawing;
+pub mod draw;
 
+pub use all::*;
 pub(crate) mod all {
     #[doc(inline)]
     pub use super::{
         char::{Char16, Char24, Char32, Char7, Char8, Chars},
-        drawing::*,
+        draw::all::*,
         find_unicode_block,
     };
 }

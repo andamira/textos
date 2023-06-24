@@ -1,4 +1,4 @@
-// textos::unicode::drawing
+// textos::unicode::draw
 //
 //! Drawing with unicode.
 //
