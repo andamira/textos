@@ -1,4 +1,4 @@
-// textos::string::chars::tests
+// textos::string::char::tests
 
 use super::*;
 use core::mem::size_of_val as size;

@@ -1,9 +1,9 @@
-// textos::string::chars
+// textos::string::char
 //
-//! Unicode scalar types.
+//! Unicode scalars.
 //
 
-use super::Strings;
+use crate::string::Strings;
 use devela::{NonSpecificU16, NonSpecificU8};
 
 mod core_impls;
@@ -19,9 +19,8 @@ pub(crate) type NonSurrogateU16 = NonSpecificU16<0xDFFF>;
 
 /* definitions */
 
-/// A 7-bit [unicode scalar value][scalar] (ASCII).
-///
-/// It can represent every scalar from the [basic latin][0w] subset of the plane 0.
+/// A 7-bit [unicode scalar value][scalar], limited to [basic latin][0w] subset
+/// (ASCII).
 ///
 /// `Option<Char7>` is the same size as `Char7` or `Char8` (1 byte).
 ///
@@ -33,15 +32,12 @@ pub(crate) type NonSurrogateU16 = NonSpecificU16<0xDFFF>;
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Char7(NonMaxU8);
 
-/// An 8-bit [unicode scalar value][scalar].
-///
-/// It can represent every scalar from the [basic latin][0w] and
-/// [latin-1 supplement][1w] subsets of the plane 0.
+/// An 8-bit [unicode scalar value][scalar], limited to [basic latin][0w]
+/// and [latin-1][1w] subsets.
 ///
 /// This is the only scalar type without memory layout optimization
-/// since each possible value is a valid unicode scalar. Therefore
+/// because each possible value is a valid unicode scalar. Therefore
 /// `Option<Char8>` is the same size as `Char16` or `Option<Char16>` (2 bytes).
-///
 ///
 /// See also: [`Char7`], [`Char16`], [`Char24`], [`Char32`], [`char`].
 ///
@@ -52,7 +48,8 @@ pub struct Char7(NonMaxU8);
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Char8(u8);
 
-/// A 16-bit [unicode scalar value][scalar].
+/// A 16-bit [unicode scalar value][scalar], limited to the
+/// [Basic Multilingual Plane][0w] subset.
 ///
 /// It can represent every scalar from the [Basic Multilingual Plane][0w] (BMP),
 /// the first and most important plane in the Unicode standard (also known as

@@ -1,4 +1,4 @@
-// textos::string::chars::core_impls
+// textos::string::char::core_impls
 
 use super::{Char16, Char24, Char32, Char7, Char8, NonMaxU8, NonSurrogateU16};
 use crate::error::{TextosError, TextosResult as Result};

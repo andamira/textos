@@ -1,4 +1,4 @@
-// textos::string::chars::impls
+// textos::string::char::impls
 //
 //!
 //
