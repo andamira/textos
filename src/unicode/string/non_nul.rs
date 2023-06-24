@@ -1,4 +1,4 @@
-// textas::string::non_nul
+// textos::unicode::string::non_nul
 //
 //! Non-nul `String` backed by an array.
 //

@@ -1,9 +1,8 @@
-// textos::string
+// textos::unicode::string
 //
 //! Strings goodies.
 //
 
-mod chars;
 mod counter;
 mod non_nul;
 mod strings;
@@ -12,12 +11,7 @@ mod u8string;
 pub use all::*;
 pub(crate) mod all {
     #[doc(inline)]
-    pub use super::{
-        chars::{Char16, Char24, Char32, Char8, Chars},
-        non_nul::*,
-        strings::Strings,
-        u8string::*,
-    };
+    pub use super::{non_nul::*, strings::Strings, u8string::*};
 
     #[doc(inline)]
     #[cfg(feature = "alloc")]

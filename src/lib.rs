@@ -21,11 +21,10 @@ pub mod error;
 
 mod ascii;
 pub mod fmt;
-pub mod string;
 pub mod unicode;
 
 /// Everything is directly available here.
 pub mod all {
     #[doc(inline)]
-    pub use super::{ascii::*, error::*, fmt::*, string::all::*, unicode::all::*};
+    pub use super::{ascii::*, error::*, fmt::*, unicode::all::*};
 }

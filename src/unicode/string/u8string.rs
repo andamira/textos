@@ -1,4 +1,4 @@
-// textas::string::static
+// textos::unicode::string::static
 //
 //! `String` backed by an array.
 //

@@ -16,6 +16,7 @@ pub use ::unicode_blocks::find_unicode_block;
 
 pub mod char;
 pub mod draw;
+pub mod string;
 
 pub use all::*;
 pub(crate) mod all {
@@ -24,5 +25,6 @@ pub(crate) mod all {
         char::{Char16, Char24, Char32, Char7, Char8, Chars},
         draw::all::*,
         find_unicode_block,
+        string::all::*,
     };
 }
