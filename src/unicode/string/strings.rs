@@ -3,7 +3,7 @@
 //! `Strings` trait.
 //
 
-use crate::error::TextosResult as Result;
+// use crate::error::TextosResult as Result;
 use core::fmt::Display;
 
 /// Common trait for all string types.
