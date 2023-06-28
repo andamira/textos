@@ -120,6 +120,12 @@ pub trait Chars: Strings {
     /// A buffer of length four is large enough to encode any char.
     fn encode_utf8(self, dst: &mut [u8]) -> &mut str;
 
+    /// Converts this `scalar` to an UTF-8 encoded sequence of bytes.
+    ///
+    /// Note that this function always returns a 4-byte array, but the actual
+    /// UTF-8 sequence may be shorter. The unused bytes are set to 0.
+    fn to_utf8_bytes(self) -> [u8; 4];
+
     /// Encodes this scalar as UTF-16 into the provided byte buffer,
     /// and then returns the subslice of the buffer that contains the encoded scalar.
     ///

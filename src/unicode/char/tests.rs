@@ -123,3 +123,56 @@ fn char_encodings() {
     assert_eq![Char32::from(Char24::try_from(c3).unwrap()).to_char(), c3];
     assert_eq![Char32::from(Char24::try_from(c4).unwrap()).to_char(), c4];
 }
+
+#[test]
+fn char_to_utf8_bytes() {
+    // Test characters from different ranges.
+    let test_chars = ['a', 'ß', 'あ', '😀'];
+
+    for (n, &c) in test_chars.iter().enumerate() {
+        // Convert the test character to UTF-8 using the standard library function.
+        let mut std_buffer = [0u8; 4];
+        let std_bytes = c.encode_utf8(&mut std_buffer);
+
+        // Convert the test character to UTF-8 using our functions.
+        if n == 0 {
+            let our_bytes = Char7::try_from_char(c).unwrap().to_utf8_bytes();
+            assert_eq!(
+                std_bytes.as_bytes(),
+                &our_bytes[..std_bytes.len()],
+                "Mismatch for character '{}'",
+                c
+            );
+        } else if n < 2 {
+            let our_bytes = Char8::try_from_char(c).unwrap().to_utf8_bytes();
+            assert_eq!(
+                std_bytes.as_bytes(),
+                &our_bytes[..std_bytes.len()],
+                "Mismatch for character '{}'",
+                c
+            );
+        } else if n < 3 {
+            let our_bytes = Char16::try_from_char(c).unwrap().to_utf8_bytes();
+            assert_eq!(
+                std_bytes.as_bytes(),
+                &our_bytes[..std_bytes.len()],
+                "Mismatch for character '{}'",
+                c
+            );
+        }
+        let our_bytes = Char24::from_char(c).to_utf8_bytes();
+        assert_eq!(
+            std_bytes.as_bytes(),
+            &our_bytes[..std_bytes.len()],
+            "Mismatch for character '{}'",
+            c
+        );
+        let our_bytes = Char32(c).to_utf8_bytes();
+        assert_eq!(
+            std_bytes.as_bytes(),
+            &our_bytes[..std_bytes.len()],
+            "Mismatch for character '{}'",
+            c
+        );
+    }
+}
