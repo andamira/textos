@@ -76,6 +76,8 @@ macro_rules! impls {
             #[inline]
             fn is_control(self) -> bool { self.to_char().is_control() }
             #[inline]
+            fn is_nul(self) -> bool { self.is_nul() }
+            #[inline]
             fn is_alphabetic(self) -> bool { self.to_char().is_alphabetic() }
             #[inline]
             fn is_numeric(self) -> bool { self.to_char().is_numeric() }
@@ -119,15 +121,21 @@ macro_rules! impls {
             ///
             /// # Panics
             /// Panics if given a radix larger than 36.
+            #[inline]
             pub const fn to_digit(self, radix: u32) -> Option<u32> {
                 self.to_char().to_digit(radix)
             }
 
             /* queries */
 
+            /// Returns `true` if this is the nul character (`0x00`).
+            #[inline]
+            pub const fn is_nul(self) -> bool { self.to_u32() == 0 }
+
             /// Checks if the unicode scalar is a digit in the given radix.
             ///
             /// See also [`to_digit`][Self#method.to_digit].
+            #[inline]
             pub const fn is_digit(self, radix: u32) -> bool {
                 if let Some(_) = self.to_digit(radix) { true } else { false }
             }
@@ -1072,6 +1080,10 @@ impl Chars for char {
         self.is_control()
     }
     #[inline]
+    fn is_nul(self) -> bool {
+        self as u32 == 0
+    }
+    #[inline]
     fn is_alphabetic(self) -> bool {
         self.is_alphabetic()
     }
@@ -1106,6 +1118,7 @@ impl Chars for char {
 
 /* helper fns */
 
+/// Returns `true` if the given unicode scalar code is a 7bit ASCII code.
 #[inline]
 const fn is_noncharacter(code: u32) -> bool {
     // sub-block of 32 non-characters:
@@ -1118,6 +1131,13 @@ const fn is_noncharacter(code: u32) -> bool {
     // surrogates (0xD800..=0xDFFF) are already filtered out in `char`.
 }
 
+/// Returns `true` if the given unicode scalar code is a 7bit ASCII code.
+#[inline]
+const fn is_7bit(code: u32) -> bool {
+    code <= 0x7F
+}
+
+/// Returns the number of bytes necessary to store the given unicode scalar code.
 #[inline]
 const fn byte_len(code: u32) -> usize {
     match code {
@@ -1126,7 +1146,22 @@ const fn byte_len(code: u32) -> usize {
         _ => 3,
     }
 }
+
+/// Returns the byte length of an utf-8 encoded scalar using a 2 byte array.
 #[inline]
-const fn is_7bit(code: u32) -> bool {
-    code <= 0x7F
+pub(crate) const fn char_utf8_2bytes_len(bytes: [u8; 2]) -> u8 {
+    1 + ((bytes[1] > 0) & (bytes[1] & 0b1100_0000 != 0b1000_0000)) as u8
+}
+/// Returns the byte length of an utf-8 encoded scalar using a 3 byte array.
+#[inline]
+pub(crate) const fn char_utf8_3bytes_len(bytes: [u8; 3]) -> u8 {
+    1 + ((bytes[1] > 0) & (bytes[1] & 0b1100_0000 != 0b1000_0000)) as u8
+        + ((bytes[2] > 0) & (bytes[2] & 0b1100_0000 != 0b1000_0000)) as u8
+}
+/// Returns the byte length of an utf-8 encoded scalar using a 4 byte array.
+#[inline]
+pub(crate) const fn char_utf8_4bytes_len(bytes: [u8; 4]) -> u8 {
+    1 + ((bytes[1] > 0) & (bytes[1] & 0b1100_0000 != 0b1000_0000)) as u8
+        + ((bytes[2] > 0) & (bytes[2] & 0b1100_0000 != 0b1000_0000)) as u8
+        + ((bytes[3] > 0) & (bytes[3] & 0b1100_0000 != 0b1000_0000)) as u8
 }

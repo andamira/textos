@@ -3,12 +3,10 @@
 //!
 //
 
-use crate::{
-    // error::TextosResult as Result,
-    unicode::{
-        egc::Egcs,
-        string::{StaticNonNulString, Strings},
-    },
+use crate::unicode::{
+    char::*,
+    egc::Egcs,
+    string::{StaticNonNulString, Strings},
 };
 #[cfg(feature = "alloc")]
 use alloc::{ffi::CString, str::Chars};
@@ -23,9 +21,95 @@ pub struct StaticNonNulEgc<const CAP: usize>(StaticNonNulString<CAP>);
 impl<const CAP: usize> StaticNonNulEgc<CAP> {
     /// Creates a new empty `StaticNonNulString`.
     #[inline]
-    pub fn new() -> Self {
-        Self::default()
+    pub const fn new() -> Self {
+        Self(StaticNonNulString::new())
     }
+
+    /// Creates a new `StaticNonNulEgc` from a `Char7`.
+    ///
+    /// If `c`.[`is_nul()`][Char7#method.is_nul] an empty egc will be returned.
+    ///
+    /// # Panic
+    /// Panics if `!c.is_nul()` and `CAP` < 1.
+    ///
+    /// Will never panic if `CAP` >= 1.
+    #[inline]
+    #[must_use]
+    pub const fn from_char7(c: Char7) -> Self {
+        Self(StaticNonNulString::from_char7(c))
+    }
+
+    /// Creates a new `StaticNonNulEgc` from a `Char8`.
+    ///
+    /// If `c`.[`is_nul()`][Char8#method.is_nul] an empty egc will be returned.
+    ///
+    /// # Panic
+    /// Panics if `!c.is_nul()` and `CAP` < `c.`[`len_utf8()`][Chars#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 2.
+    #[inline]
+    #[must_use]
+    pub const fn from_char8(c: Char8) -> Self {
+        Self(StaticNonNulString::from_char8(c))
+    }
+
+    /// Creates a new `StaticNonNulEgc` from a `Char16`.
+    ///
+    /// If `c`.[`is_nul()`][Char16#method.is_nul] an empty egc will be returned.
+    ///
+    /// # Panic
+    /// Panics if `!c.is_nul()` and `CAP` < `c.`[`len_utf8()`][Chars#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 3
+    #[inline]
+    #[must_use]
+    pub const fn from_char16(c: Char16) -> Self {
+        Self(StaticNonNulString::from_char16(c))
+    }
+
+    /// Creates a new `StaticNonNulEgc` from a `Char24`.
+    ///
+    /// If `c`.[`is_nul()`][Char24#method.is_nul] an empty egc will be returned.
+    ///
+    /// # Panic
+    /// Panics if `!c.is_nul()` and `CAP` < `c.`[`len_utf8()`][Chars#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 4.
+    #[inline]
+    #[must_use]
+    pub const fn from_char24(c: Char24) -> Self {
+        Self(StaticNonNulString::from_char24(c))
+    }
+
+    /// Creates a new `StaticNonNulEgc` from a `Char32`.
+    ///
+    /// If `c`.[`is_nul()`][Char32#method.is_nul] an empty egc will be returned.
+    ///
+    /// # Panic
+    /// Panics if `!c.is_nul()` and `CAP` < `c.`[`len_utf8()`][Chars#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 4.
+    #[inline]
+    #[must_use]
+    pub const fn from_char32(c: Char32) -> Self {
+        Self(StaticNonNulString::from_char32(c))
+    }
+
+    /// Creates a new `StaticNonNulEgc` from a `char`.
+    ///
+    /// If `c`.[`is_nul()`][Chars#method.is_nul] an empty egc will be returned.
+    ///
+    /// # Panic
+    /// Panics if `!c.is_nul()` and `CAP` < `c.`[`len_utf8()`][Chars#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 4.
+    #[inline]
+    #[must_use]
+    pub const fn from_char(c: char) -> Self {
+        Self::from_char32(Char32(c))
+    }
+
+    //
 
     /// Returns the length in bytes.
     pub fn len(&self) -> usize {
@@ -133,10 +217,10 @@ mod core_impls {
     use super::*;
 
     impl<const CAP: usize> Default for StaticNonNulEgc<CAP> {
-        /// Returns an empty string.
+        /// Returns an empty extended grapheme character.
         #[inline]
         fn default() -> Self {
-            Self(StaticNonNulString::default())
+            Self::new()
         }
     }
 

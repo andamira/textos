@@ -9,6 +9,7 @@ use alloc::{ffi::CString, str::Chars};
 use crate::{
     error::{TextosError, TextosResult as Result},
     macros::impl_sized_alias,
+    unicode::char::*,
 };
 use core::fmt;
 use devela::paste;
@@ -28,9 +29,148 @@ pub struct StaticNonNulString<const CAP: usize> {
 impl<const CAP: usize> StaticNonNulString<CAP> {
     /// Creates a new empty `StaticNonNulString`.
     #[inline]
-    pub fn new() -> Self {
-        Self::default()
+    pub const fn new() -> Self {
+        Self { arr: [0; CAP] }
     }
+
+    /// Creates a new `StaticNonNulString` from a `Char7`.
+    ///
+    /// If `c`.[`is_nul()`][Char7#method.is_nul] an empty string will be returned.
+    ///
+    /// # Panic
+    /// Panics if `!c.is_nul()` and `CAP` < 1
+    ///
+    /// Will never panic if `CAP` >= 1.
+    #[inline]
+    pub const fn from_char7(c: Char7) -> Self {
+        let mut new = Self::new();
+        if !c.is_nul() {
+            new.arr[0] = c.to_utf8_bytes()[0];
+        }
+        new
+    }
+
+    /// Creates a new `StaticU8String` from a `Char8`.
+    ///
+    /// If `c`.[`is_nul()`][Char8#method.is_nul] an empty string will be returned.
+    ///
+    /// # Panic
+    /// Panics if `!c.is_nul()` and `CAP` < `c.`[`len_utf8()`][Char8#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 2.
+    #[inline]
+    pub const fn from_char8(c: Char8) -> Self {
+        let mut new = Self::new();
+        if !c.is_nul() {
+            let bytes = c.to_utf8_bytes();
+            let len = char_utf8_2bytes_len(bytes);
+
+            new.arr[0] = bytes[0];
+            if len > 1 {
+                new.arr[1] = bytes[1];
+            }
+        }
+        new
+    }
+
+    /// Creates a new `StaticU8String` from a `Char16`.
+    ///
+    /// If `c`.[`is_nul()`][Char16#method.is_nul] an empty string will be returned.
+    ///
+    /// # Panic
+    /// Panics if `!c.is_nul()` and `CAP` < `c.`[`len_utf8()`][Char8#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 3.
+    #[inline]
+    pub const fn from_char16(c: Char16) -> Self {
+        let mut new = Self::new();
+        if !c.is_nul() {
+            let bytes = c.to_utf8_bytes();
+            let len = char_utf8_3bytes_len(bytes);
+
+            new.arr[0] = bytes[0];
+            if len > 1 {
+                new.arr[1] = bytes[1];
+            }
+            if len > 2 {
+                new.arr[2] = bytes[2];
+            }
+        }
+        new
+    }
+
+    /// Creates a new `StaticU8String` from a `Char24`.
+    ///
+    /// If `c`.[`is_nul()`][Char24#method.is_nul] an empty string will be returned.
+    ///
+    /// # Panic
+    /// Panics if `!c.is_nul()` and `CAP` < `c.`[`len_utf8()`][Char8#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 4.
+    #[inline]
+    pub const fn from_char24(c: Char24) -> Self {
+        let mut new = Self::new();
+        if !c.is_nul() {
+            let bytes = c.to_utf8_bytes();
+            let len = char_utf8_4bytes_len(bytes);
+
+            new.arr[0] = bytes[0];
+            if len > 1 {
+                new.arr[1] = bytes[1];
+            }
+            if len > 2 {
+                new.arr[2] = bytes[2];
+            }
+            if len > 3 {
+                new.arr[3] = bytes[3];
+            }
+        }
+        new
+    }
+
+    /// Creates a new `StaticU8String` from a `Char32`.
+    ///
+    /// If `c`.[`is_nul()`][Char32#method.is_nul] an empty string will be returned.
+    ///
+    /// # Panic
+    /// Panics if `!c.is_nul()` and `CAP` < `c.`[`len_utf8()`][Char8#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` is >= 4.
+    #[inline]
+    pub const fn from_char32(c: Char32) -> Self {
+        let mut new = Self::new();
+        if !c.is_nul() {
+            let bytes = c.to_utf8_bytes();
+            let len = char_utf8_4bytes_len(bytes);
+
+            new.arr[0] = bytes[0];
+            if len > 1 {
+                new.arr[1] = bytes[1];
+            }
+            if len > 2 {
+                new.arr[2] = bytes[2];
+            }
+            if len > 3 {
+                new.arr[3] = bytes[3];
+            }
+        }
+        new
+    }
+
+    /// Creates a new `StaticU8String` from a `char`.
+    ///
+    /// If `c`.[`is_nul()`][Chars#method.is_nul] an empty string will be returned.
+    ///
+    /// # Panic
+    /// Panics if `!c.is_nul()` and `CAP` < `c.`[`len_utf8()`][Chars#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` is >= 4.
+    #[inline]
+    pub const fn from_char(c: char) -> Self {
+        Self::from_char32(Char32(c))
+    }
+
+    //
 
     /// Returns the total capacity in bytes.
     #[inline]
@@ -305,7 +445,7 @@ impl<const CAP: usize> Default for StaticNonNulString<CAP> {
     /// Returns an empty string.
     #[inline]
     fn default() -> Self {
-        Self { arr: [0; CAP] }
+        Self::new()
     }
 }
 

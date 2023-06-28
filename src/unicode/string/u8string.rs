@@ -9,6 +9,7 @@ use alloc::{ffi::CString, str::Chars};
 use crate::{
     error::{TextosError, TextosResult as Result},
     macros::impl_sized_alias,
+    unicode::char::*,
 };
 use core::{fmt, ops::Deref};
 use devela::paste;
@@ -30,9 +31,135 @@ impl<const CAP: usize> StaticU8String<CAP> {
     /// # Panics
     /// Panics if `CAP` > 255.
     #[inline]
-    pub fn new() -> Self {
-        Self::default()
+    pub const fn new() -> Self {
+        assert![CAP <= 255];
+        Self {
+            arr: [0; CAP],
+            len: 0,
+        }
     }
+
+    /// Creates a new `StaticU8String` from a `Char7`.
+    ///
+    /// # Panic
+    /// Panics if `CAP` > 255 or < 1.
+    ///
+    /// Will never panic if `CAP` >= 1 and <= 255.
+    #[inline]
+    pub const fn from_char7(c: Char7) -> Self {
+        let mut new = Self::new();
+        new.arr[0] = c.to_utf8_bytes()[0];
+        new.len = 1;
+        new
+    }
+
+    /// Creates a new `StaticU8String` from a `Char8`.
+    ///
+    /// # Panic
+    /// Panics if `CAP` > 255 or < `c.`[`len_utf8()`][Char8#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 2 and <= 255.
+    #[inline]
+    pub const fn from_char8(c: Char8) -> Self {
+        let mut new = Self::new();
+
+        let bytes = c.to_utf8_bytes();
+        new.len = char_utf8_2bytes_len(bytes);
+
+        new.arr[0] = bytes[0];
+        if new.len > 1 {
+            new.arr[1] = bytes[1];
+        }
+        new
+    }
+
+    /// Creates a new `StaticU8String` from a `Char16`.
+    ///
+    /// # Panic
+    /// Panics if `CAP` > 255 or < `c.`[`len_utf8()`][Char16#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 3 and <= 255.
+    #[inline]
+    pub const fn from_char16(c: Char16) -> Self {
+        let mut new = Self::new();
+
+        let bytes = c.to_utf8_bytes();
+        new.len = char_utf8_3bytes_len(bytes);
+
+        new.arr[0] = bytes[0];
+        if new.len > 1 {
+            new.arr[1] = bytes[1];
+        }
+        if new.len > 2 {
+            new.arr[2] = bytes[2];
+        }
+        new
+    }
+
+    /// Creates a new `StaticU8String` from a `Char24`.
+    ///
+    /// # Panic
+    /// Panics if `CAP` > 255 or < `c.`[`len_utf8()`][Char24#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 4 and <= 255.
+    #[inline]
+    pub const fn from_char24(c: Char24) -> Self {
+        let mut new = Self::new();
+
+        let bytes = c.to_utf8_bytes();
+        new.len = char_utf8_4bytes_len(bytes);
+
+        new.arr[0] = bytes[0];
+        if new.len > 1 {
+            new.arr[1] = bytes[1];
+        }
+        if new.len > 2 {
+            new.arr[2] = bytes[2];
+        }
+        if new.len > 3 {
+            new.arr[3] = bytes[3];
+        }
+        new
+    }
+
+    /// Creates a new `StaticU8String` from a `Char32`.
+    ///
+    /// # Panic
+    /// Panics if `CAP` > 255 or < `c.`[`len_utf8()`][Char32#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 4 and <= 255.
+    #[inline]
+    pub const fn from_char32(c: Char32) -> Self {
+        let mut new = Self::new();
+
+        let bytes = c.to_utf8_bytes();
+        new.len = char_utf8_4bytes_len(bytes);
+
+        new.arr[0] = bytes[0];
+        if new.len > 1 {
+            new.arr[1] = bytes[1];
+        }
+        if new.len > 2 {
+            new.arr[2] = bytes[2];
+        }
+        if new.len > 3 {
+            new.arr[3] = bytes[3];
+        }
+        new
+    }
+
+    /// Creates a new `StaticU8String` from a `char`.
+    ///
+    /// # Panic
+    /// Panics if `CAP` > 255 or < `c.`[`len_utf8()`][Chars#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 4 and <= 255.
+    #[inline]
+    pub const fn from_char(c: char) -> Self {
+        Self::from_char32(Char32(c))
+    }
+
+    //
 
     /// Returns the total capacity in bytes.
     #[inline]
@@ -235,11 +362,7 @@ impl<const CAP: usize> Default for StaticU8String<CAP> {
     /// Panics if `CAP` > 255.
     #[inline]
     fn default() -> Self {
-        assert![CAP <= 255];
-        Self {
-            arr: [0; CAP],
-            len: 0,
-        }
+        Self::new()
     }
 }
 

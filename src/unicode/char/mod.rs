@@ -17,6 +17,8 @@ pub(crate) type NonMaxU8 = NonSpecificU8<0xFF>;
 // This is a surrogate UTF-16 code point that can't ever be a unicode scalar.
 pub(crate) type NonSurrogateU16 = NonSpecificU16<0xDFFF>;
 
+pub(crate) use impls::{char_utf8_2bytes_len, char_utf8_3bytes_len, char_utf8_4bytes_len};
+
 /* definitions */
 
 /// A 7-bit [unicode scalar value][scalar], limited to [basic latin][0w] subset
@@ -190,6 +192,9 @@ pub trait Chars: Strings {
     /// Returns `true` if this unicode scalar has the general category for
     /// control codes.
     fn is_control(self) -> bool;
+
+    /// Returns `true` if this unicode scalar is the nul character (`0x00`).
+    fn is_nul(self) -> bool;
 
     /// Returns `true` if this unicode scalar has the `Alphabetic` property.
     fn is_alphabetic(self) -> bool;

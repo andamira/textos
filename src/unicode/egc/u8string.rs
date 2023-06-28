@@ -3,12 +3,10 @@
 //!
 //
 
-use crate::{
-    // error::TextosResult as Result,
-    unicode::{
-        egc::Egcs,
-        string::{StaticU8String, Strings},
-    },
+use crate::unicode::{
+    char::*,
+    egc::Egcs,
+    string::{StaticU8String, Strings},
 };
 #[cfg(feature = "alloc")]
 use alloc::{ffi::CString, str::Chars};
@@ -21,11 +19,89 @@ use core::fmt;
 pub struct StaticU8Egc<const CAP: usize>(StaticU8String<CAP>);
 
 impl<const CAP: usize> StaticU8Egc<CAP> {
-    /// Creates a new empty `StaticNonNulString`.
+    /// Creates a new empty `StaticU8Egc`.
+    ///
+    /// # Panics
+    /// Panics if `CAP` > 255.
     #[inline]
-    pub fn new() -> Self {
-        Self::default()
+    #[must_use]
+    pub const fn new() -> Self {
+        Self(StaticU8String::new())
     }
+
+    /// Creates a new `StaticU8Egc` from a `Char7`.
+    ///
+    /// # Panic
+    /// Panics if `CAP` > 255 or < 1.
+    ///
+    /// Will never panic if `CAP` >= 1 and <= 255.
+    #[inline]
+    #[must_use]
+    pub const fn from_char7(c: Char7) -> Self {
+        Self(StaticU8String::from_char7(c))
+    }
+
+    /// Creates a new `StaticU8Egc` from a `Char8`.
+    ///
+    /// # Panic
+    /// Panics if `CAP` > 255 or < `c.`[`len_utf8()`][Char8#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 2 and <= 255.
+    #[inline]
+    #[must_use]
+    pub const fn from_char8(c: Char8) -> Self {
+        Self(StaticU8String::from_char8(c))
+    }
+
+    /// Creates a new `StaticU8Egc` from a `Char16`.
+    ///
+    /// # Panic
+    /// Panics if `CAP` > 255 or < `c.`[`len_utf8()`][Char16#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 3 and <= 255.
+    #[inline]
+    #[must_use]
+    pub const fn from_char16(c: Char16) -> Self {
+        Self(StaticU8String::from_char16(c))
+    }
+
+    /// Creates a new `StaticU8Egc` from a `Char24`.
+    ///
+    /// # Panic
+    /// Panics if `CAP` > 255 or < `c.`[`len_utf8()`][Char24#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 4 and <= 255.
+    #[inline]
+    #[must_use]
+    pub const fn from_char24(c: Char24) -> Self {
+        Self(StaticU8String::from_char24(c))
+    }
+
+    /// Creates a new `StaticU8Egc` from a `Char32`.
+    ///
+    /// # Panic
+    /// Panics if `CAP` > 255 or < `c.`[`len_utf8()`][Char32#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 4 and <= 255.
+    #[inline]
+    #[must_use]
+    pub const fn from_char32(c: Char32) -> Self {
+        Self(StaticU8String::from_char32(c))
+    }
+
+    /// Creates a new `StaticU8Egc` from a `char`.
+    ///
+    /// # Panic
+    /// Panics if `CAP` > 255 or < `c.`[`len_utf8()`][Chars#method.len_utf8].
+    ///
+    /// Will never panic if `CAP` >= 4 and <= 255.
+    #[inline]
+    #[must_use]
+    pub const fn from_char(c: char) -> Self {
+        Self::from_char32(Char32(c))
+    }
+
+    //
 
     /// Returns the length in bytes.
     pub const fn len(&self) -> usize {
@@ -120,9 +196,8 @@ impl<const CAP: usize> StaticU8Egc<CAP> {
     pub fn to_cstring(&self) -> CString {
         self.0.to_cstring()
     }
-
-    //
 }
+
 /* traits */
 
 impl<const CAP: usize> Strings for StaticU8Egc<CAP> {}
@@ -132,10 +207,10 @@ mod core_impls {
     use super::*;
 
     impl<const CAP: usize> Default for StaticU8Egc<CAP> {
-        /// Returns an empty string.
+        /// Returns an empty extended grapheme character.
         #[inline]
         fn default() -> Self {
-            Self(StaticU8String::default())
+            Self::new()
         }
     }
 

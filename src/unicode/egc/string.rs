@@ -3,11 +3,11 @@
 //!
 //
 
+use crate::unicode::char::*;
 use core::fmt;
-use crate::unicode::{char::*};
 use unicode_segmentation::UnicodeSegmentation;
 
-use alloc::str::Chars;
+use alloc::str::{self, Chars};
 
 /// An extended grapheme cluster backed by a [`String`].
 #[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -18,9 +18,41 @@ pub struct Egc(String);
 impl Egc {
     /// Creates a new empty `StaticNonNulString`.
     #[inline]
-    pub fn new() -> Self {
-        Self::default()
+    pub const fn new() -> Self {
+        Self(String::new())
     }
+
+    #[inline]
+    pub fn from_char7(c: Char7) -> Self {
+        str::from_utf8(&c.to_utf8_bytes()).unwrap().into()
+    }
+
+    #[inline]
+    pub fn from_char8(c: Char8) -> Self {
+        str::from_utf8(&c.to_utf8_bytes()).unwrap().into()
+    }
+
+    #[inline]
+    pub fn from_char16(c: Char16) -> Self {
+        str::from_utf8(&c.to_utf8_bytes()).unwrap().into()
+    }
+
+    #[inline]
+    pub fn from_char24(c: Char24) -> Self {
+        str::from_utf8(&c.to_utf8_bytes()).unwrap().into()
+    }
+
+    #[inline]
+    pub fn from_char32(c: Char32) -> Self {
+        str::from_utf8(&c.to_utf8_bytes()).unwrap().into()
+    }
+
+    #[inline]
+    pub fn from_char(c: char) -> Self {
+        Self::from_char32(Char32(c))
+    }
+
+    //
 
     /// Returns the length in bytes.
     #[inline]
@@ -54,7 +86,7 @@ impl Default for Egc {
     /// Returns an empty string.
     #[inline]
     fn default() -> Self {
-        Self(String::default())
+        Self::new()
     }
 }
 
