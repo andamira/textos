@@ -21,6 +21,7 @@ pub mod error;
 
 mod ascii;
 pub mod fmt;
+pub(crate) mod macros;
 pub mod unicode;
 
 /// Everything is directly available here.

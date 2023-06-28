@@ -6,8 +6,10 @@
 #[cfg(feature = "alloc")]
 use alloc::{ffi::CString, str::Chars};
 
-use super::impl_sized_alias;
-use crate::error::{TextosError, TextosResult as Result};
+use crate::{
+    error::{TextosError, TextosResult as Result},
+    macros::impl_sized_alias,
+};
 use core::{fmt, ops::Deref};
 use devela::paste;
 
