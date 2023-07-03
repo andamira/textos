@@ -2,17 +2,24 @@
 //
 //! `String` backed by an array.
 //
+// TOC
+// - definitions
+// - trait impls
+// - conversions
+// - tests
 
 #[cfg(feature = "alloc")]
 use alloc::{ffi::CString, str::Chars};
 
 use crate::{
-    error::{TextosError, TextosResult as Result},
+    error::{TextosError as Error, TextosResult as Result},
     macros::impl_sized_alias,
     unicode::char::*,
 };
 use core::{fmt, ops::Deref};
 use devela::paste;
+
+/* definitions */
 
 /// A UTF-8-encoded string, backed by an array,
 /// with a maximum constant capacity of 255 bytes.
@@ -24,6 +31,23 @@ pub struct StaticU8String<const CAP: usize> {
     arr: [u8; CAP],
     len: u8,
 }
+
+impl_sized_alias![
+    String, StaticU8String,
+    "UTF-8-encoded string, with a fixed capacity of ", ".":
+    "A" 16, 1 "";
+    "A" 24, 2 "s";
+    "A" 32, 3 "s";
+    "A" 40, 4 "s";
+    "A" 48, 5 "s";
+    "A" 56, 6 "s";
+    "A" 64, 7 "s";
+    "A" 128, 15 "s";
+    "A" 256, 31 "s";
+    "A" 512, 63 "s";
+    "A" 1024, 127 "s";
+    "A" 2048, 255 "s"
+];
 
 impl<const CAP: usize> StaticU8String<CAP> {
     /// Creates a new empty `StaticU8String`.
@@ -311,7 +335,7 @@ impl<const CAP: usize> StaticU8String<CAP> {
                 self.len -= c.len_utf8() as u8;
                 c
             })
-            .ok_or(TextosError::NotEnoughElements(1))
+            .ok_or(Error::NotEnoughElements(1))
     }
 
     /// Appends to the end of the string the given `character`.
@@ -348,7 +372,7 @@ impl<const CAP: usize> StaticU8String<CAP> {
             self.len += char_len as u8;
             Ok(char_len)
         } else {
-            Err(TextosError::NotEnoughCapacity(char_len))
+            Err(Error::NotEnoughCapacity(char_len))
         }
     }
 }
@@ -386,56 +410,49 @@ impl<const CAP: usize> Deref for StaticU8String<CAP> {
     }
 }
 
-/* specific sizes */
-
-impl_sized_alias![
-    String, StaticU8String,
-    "UTF-8-encoded string, with a fixed capacity of ", ".":
-    "A" 16, 1 "";
-    "A" 24, 2 "s";
-    "A" 32, 3 "s";
-    "A" 40, 4 "s";
-    "A" 48, 5 "s";
-    "A" 56, 6 "s";
-    "A" 64, 7 "s";
-    "A" 128, 15 "s";
-    "A" 256, 31 "s";
-    "A" 512, 63 "s";
-    "A" 1024, 127 "s";
-    "A" 2048, 255 "s"
-];
+/* conversions */
 
 macro_rules! impl_from_char {
+    // $char:ty char type
     // $for_name: `for` type name prefix
     // $bit: size in bits.
-    ( $for_name:ident: $( $for_bit:expr ),+ ) => {
-        $( impl_from_char![@$for_name: $for_bit]; )+
+    ( $char:ty => $for_name:ident: $( $for_bit:expr ),+ ) => {
+        $( impl_from_char![@$char => $for_name: $for_bit]; )+
     };
-    ( @$for_name:ident: $for_bit:expr ) => { paste! {
-        impl From<char> for [< $for_name $for_bit >] {
-            fn from(c: char) -> [< $for_name $for_bit >] {
+    ( @$char:ty => $for_name:ident: $for_bit:expr ) => { paste! {
+        impl From<$char> for [< $for_name $for_bit >] {
+            fn from(c: $char) -> [< $for_name $for_bit >] {
                 let mut s = Self::default();
-                let _ = s.push(c);
+                let _ = s.push(c.into());
                 s
             }
         }
     }};
-    (try $for_name:ident: $( $for_bit:expr ),+ ) => {
-        $( impl_from_char![@try $for_name: $for_bit]; )+
+    ( try $char:ty => $for_name:ident: $( $for_bit:expr ),+ ) => {
+        $( impl_from_char![@try $char => $for_name: $for_bit]; )+
     };
-    ( @try $for_name:ident: $for_bit:expr ) => { paste! {
-        impl TryFrom<char> for [< $for_name $for_bit >] {
-            type Error = TextosError;
-            fn try_from(c: char) -> Result<[< $for_name $for_bit >]> {
+    ( @try $char:ty => $for_name:ident: $for_bit:expr ) => { paste! {
+        impl TryFrom<$char> for [< $for_name $for_bit >] {
+            type Error = Error;
+            fn try_from(c: $char) -> Result<[< $for_name $for_bit >]> {
                 let mut s = Self::default();
-                s.try_push(c)?;
+                s.try_push(c.into())?;
                 Ok(s)
             }
         }
     }};
 }
-impl_from_char![String: 40, 48, 56, 64, 128, 256, 512, 1024, 2048];
-impl_from_char![try String: 16, 24, 32];
+impl_from_char![Char7 => String: 16, 24, 32, 40, 48, 56, 64, 128, 256, 512, 1024, 2048];
+impl_from_char![Char8 => String: 24, 32, 40, 48, 56, 64, 128, 256, 512, 1024, 2048];
+impl_from_char![try Char8 => String: 16];
+impl_from_char![Char16 => String: 32, 40, 48, 56, 64, 128, 256, 512, 1024, 2048];
+impl_from_char![try Char16 => String: 16, 24];
+impl_from_char![Char24 => String: 40, 48, 56, 64, 128, 256, 512, 1024, 2048];
+impl_from_char![try Char24 => String: 16, 24, 32];
+impl_from_char![Char32 => String: 40, 48, 56, 64, 128, 256, 512, 1024, 2048];
+impl_from_char![try Char32 => String: 16, 24, 32];
+impl_from_char![char => String: 40, 48, 56, 64, 128, 256, 512, 1024, 2048];
+impl_from_char![try char => String: 16, 24, 32];
 
 #[cfg(test)]
 mod tests {

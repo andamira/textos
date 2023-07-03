@@ -2,17 +2,23 @@
 //
 //! Non-nul `String` backed by an array.
 //
+// TOC
+// - definitions
+// - trait impls
+// - conversions
 
 #[cfg(feature = "alloc")]
 use alloc::{ffi::CString, str::Chars};
 
 use crate::{
-    error::{TextosError, TextosResult as Result},
+    error::{TextosError as Error, TextosResult as Result},
     macros::impl_sized_alias,
     unicode::char::*,
 };
 use core::fmt;
 use devela::paste;
+
+/* definitions */
 
 /// The nul character.
 const NUL: char = '\0';
@@ -25,6 +31,25 @@ const NUL: char = '\0';
 pub struct StaticNonNulString<const CAP: usize> {
     arr: [u8; CAP],
 }
+
+impl_sized_alias![
+    NonNulString, StaticNonNulString,
+    "UTF-8-encoded string, with a fixed capacity of ",
+    ", that can't contain nul characters.":
+    "An" 8, 1 "";
+    "A" 16, 2 "s";
+    "A" 24, 3 "s";
+    "A" 32, 4 "s";
+    "A" 40, 5 "s";
+    "A" 48, 6 "s";
+    "A" 56, 7 "s";
+    "A" 64, 8 "s";
+    "A" 128, 16 "s";
+    "A" 256, 32 "s";
+    "A" 512, 64 "s";
+    "A" 1024, 128 "s";
+    "A" 2048, 256 "s"
+];
 
 impl<const CAP: usize> StaticNonNulString<CAP> {
     /// Creates a new empty `StaticNonNulString`.
@@ -303,7 +328,7 @@ impl<const CAP: usize> StaticNonNulString<CAP> {
     #[inline]
     pub fn try_pop(&mut self) -> Result<char> {
         if self.is_empty() {
-            Err(TextosError::NotEnoughElements(1))
+            Err(Error::NotEnoughElements(1))
         } else {
             Ok(self.pop_unchecked())
         }
@@ -367,7 +392,7 @@ impl<const CAP: usize> StaticNonNulString<CAP> {
             let _ = character.encode_utf8(&mut self.arr[len..new_len]);
             Ok(char_len)
         } else {
-            Err(TextosError::NotEnoughCapacity(char_len))
+            Err(Error::NotEnoughCapacity(char_len))
         }
     }
 
@@ -413,7 +438,7 @@ impl<const CAP: usize> StaticNonNulString<CAP> {
             .map(|c| c.len_utf8())
             .unwrap_or(0);
         if self.remaining_capacity() < first_char_len {
-            Err(TextosError::NotEnoughCapacity(first_char_len))
+            Err(Error::NotEnoughCapacity(first_char_len))
         } else {
             Ok(self.push_str(string))
         }
@@ -434,7 +459,7 @@ impl<const CAP: usize> StaticNonNulString<CAP> {
         if self.remaining_capacity() >= non_nul_len {
             Ok(self.push_str(string))
         } else {
-            Err(TextosError::NotEnoughCapacity(non_nul_len))
+            Err(Error::NotEnoughCapacity(non_nul_len))
         }
     }
 }
@@ -462,55 +487,46 @@ impl<const CAP: usize> fmt::Debug for StaticNonNulString<CAP> {
     }
 }
 
-/* specific sizes */
-
-impl_sized_alias![
-    NonNulString, StaticNonNulString,
-    "UTF-8-encoded string, with a fixed capacity of ",
-    ", that can't contain nul characters.":
-    "An" 8, 1 "";
-    "A" 16, 2 "s";
-    "A" 24, 3 "s";
-    "A" 32, 4 "s";
-    "A" 40, 5 "s";
-    "A" 48, 6 "s";
-    "A" 56, 7 "s";
-    "A" 64, 8 "s";
-    "A" 128, 16 "s";
-    "A" 256, 32 "s";
-    "A" 512, 64 "s";
-    "A" 1024, 128 "s";
-    "A" 2048, 256 "s"
-];
+/* conversions */
 
 macro_rules! impl_from_char {
+    // $char:ty char type
     // $for_name: `for` type name prefix
     // $bit: size in bits.
-    ( $for_name:ident: $( $for_bit:expr ),+ ) => {
-        $( impl_from_char![@$for_name: $for_bit]; )+
+    ( $char:ty => $for_name:ident: $( $for_bit:expr ),+ ) => {
+        $( impl_from_char![@$char => $for_name: $for_bit]; )+
     };
-    ( @$for_name:ident: $for_bit:expr ) => { paste! {
-        impl From<char> for [< $for_name $for_bit >] {
-            fn from(c: char) -> [< $for_name $for_bit >] {
+    ( @$char:ty => $for_name:ident: $for_bit:expr ) => { paste! {
+        impl From<$char> for [< $for_name $for_bit >] {
+            fn from(c: $char) -> [< $for_name $for_bit >] {
                 let mut s = Self::default();
-                let _ = s.push(c);
+                let _ = s.push(c.into());
                 s
             }
         }
     }};
-    (try $for_name:ident: $( $for_bit:expr ),+ ) => {
-        $( impl_from_char![@try $for_name: $for_bit]; )+
+    ( try $char:ty => $for_name:ident: $( $for_bit:expr ),+ ) => {
+        $( impl_from_char![@try $char => $for_name: $for_bit]; )+
     };
-    ( @try $for_name:ident: $for_bit:expr ) => { paste! {
-        impl TryFrom<char> for [< $for_name $for_bit >] {
-            type Error = TextosError;
-            fn try_from(c: char) -> Result<[< $for_name $for_bit >]> {
+    ( @try $char:ty => $for_name:ident: $for_bit:expr ) => { paste! {
+        impl TryFrom<$char> for [< $for_name $for_bit >] {
+            type Error = Error;
+            fn try_from(c: $char) -> Result<[< $for_name $for_bit >]> {
                 let mut s = Self::default();
-                s.try_push(c)?;
+                s.try_push(c.into())?;
                 Ok(s)
             }
         }
     }};
 }
-impl_from_char![NonNulString: 32, 40, 48, 56, 64, 128, 256, 512, 1024, 2048];
-impl_from_char![try NonNulString: 8, 16, 24];
+impl_from_char![Char7 => NonNulString: 8, 16, 24, 32, 40, 48, 56, 64, 128, 256, 512, 1024, 2048];
+impl_from_char![Char8 => NonNulString: 16, 24, 32, 40, 48, 56, 64, 128, 256, 512, 1024, 2048];
+impl_from_char![try Char8 => NonNulString: 8];
+impl_from_char![Char16 => NonNulString: 24, 32, 40, 48, 56, 64, 128, 256, 512, 1024, 2048];
+impl_from_char![try Char16 => NonNulString: 8, 16];
+impl_from_char![Char24 => NonNulString: 32, 40, 48, 56, 64, 128, 256, 512, 1024, 2048];
+impl_from_char![try Char24 => NonNulString: 8, 16, 24];
+impl_from_char![Char32 => NonNulString: 32, 40, 48, 56, 64, 128, 256, 512, 1024, 2048];
+impl_from_char![try Char32 => NonNulString: 8, 16, 24];
+impl_from_char![char => NonNulString: 32, 40, 48, 56, 64, 128, 256, 512, 1024, 2048];
+impl_from_char![try char => NonNulString: 8, 16, 24];

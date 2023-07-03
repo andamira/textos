@@ -16,39 +16,45 @@ use alloc::str::{self, Chars};
 pub struct Egc(String);
 
 impl Egc {
-    /// Creates a new empty `StaticNonNulString`.
+    /// Creates a new empty extended grapheme cluster.
     #[inline]
-    pub const fn new() -> Self {
+    pub const fn new() -> Egc {
         Self(String::new())
     }
 
+    /// Creates a new `Egc` from a `Char7`.
     #[inline]
-    pub fn from_char7(c: Char7) -> Self {
+    pub fn from_char7(c: Char7) -> Egc {
         str::from_utf8(&c.to_utf8_bytes()).unwrap().into()
     }
 
+    /// Creates a new `Egc` from a `Char8`.
     #[inline]
-    pub fn from_char8(c: Char8) -> Self {
+    pub fn from_char8(c: Char8) -> Egc {
         str::from_utf8(&c.to_utf8_bytes()).unwrap().into()
     }
 
+    /// Creates a new `Egc` from a `Char16`.
     #[inline]
-    pub fn from_char16(c: Char16) -> Self {
+    pub fn from_char16(c: Char16) -> Egc {
         str::from_utf8(&c.to_utf8_bytes()).unwrap().into()
     }
 
+    /// Creates a new `Egc` from a `Char24`.
     #[inline]
-    pub fn from_char24(c: Char24) -> Self {
+    pub fn from_char24(c: Char24) -> Egc {
         str::from_utf8(&c.to_utf8_bytes()).unwrap().into()
     }
 
+    /// Creates a new `Egc` from a `Char32`.
     #[inline]
-    pub fn from_char32(c: Char32) -> Self {
+    pub fn from_char32(c: Char32) -> Egc {
         str::from_utf8(&c.to_utf8_bytes()).unwrap().into()
     }
 
+    /// Creates a new `Egc` from a `char`.
     #[inline]
-    pub fn from_char(c: char) -> Self {
+    pub fn from_char(c: char) -> Egc {
         Self::from_char32(Char32(c))
     }
 
@@ -83,7 +89,7 @@ impl Egc {
 /* traits */
 
 impl Default for Egc {
-    /// Returns an empty string.
+    /// Returns a new empty extended grapheme cluster.
     #[inline]
     fn default() -> Self {
         Self::new()

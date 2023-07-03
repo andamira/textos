@@ -2,21 +2,45 @@
 //
 //!
 //
+// TOC
+// - definitions
+// - trait impls
+// - conversions
 
-use crate::unicode::{
-    char::*,
-    egc::Egcs,
-    string::{StaticU8String, Strings},
+use crate::{
+    error::{TextosError as Error, TextosResult as Result},
+    macros::impl_sized_alias,
+    unicode::{
+        char::*,
+        egc::Egcs,
+        string::{StaticU8String, Strings},
+    },
 };
 #[cfg(feature = "alloc")]
 use alloc::{ffi::CString, str::Chars};
 use core::fmt;
+use devela::paste;
 // use unicode_segmentation::UnicodeSegmentation;
+
+/* definitions */
 
 /// An extended grapheme cluster backed by a [`StaticU8String`].
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[repr(transparent)]
 pub struct StaticU8Egc<const CAP: usize>(StaticU8String<CAP>);
+
+impl_sized_alias![
+    Egc, StaticU8Egc,
+    "extended grapheme cluster, with a fixed capacity of ", ".":
+    "A" 16, 1 "";
+    "A" 24, 2 "s";
+    "A" 32, 3 "s";
+    "A" 40, 4 "s";
+    "A" 48, 5 "s";
+    "A" 56, 6 "s";
+    "A" 64, 7 "s";
+    "A" 128, 15 "s"
+];
 
 impl<const CAP: usize> StaticU8Egc<CAP> {
     /// Creates a new empty `StaticU8Egc`.
@@ -243,3 +267,45 @@ mod core_impls {
     //     }
     // }
 }
+
+macro_rules! impl_from_char {
+    // $char:ty char type
+    // $for_name: `for` type name prefix
+    // $bit: size in bits.
+    ( $char:ty => $for_name:ident: $( $for_bit:expr ),+ ) => {
+        $( impl_from_char![@$char => $for_name: $for_bit]; )+
+    };
+    ( @$char:ty => $for_name:ident: $for_bit:expr ) => { paste! {
+        impl From<$char> for [< $for_name $for_bit >] {
+            fn from(c: $char) -> [< $for_name $for_bit >] {
+                let mut s = Self::default();
+                let _ = s.0.push(c.into());
+                s
+            }
+        }
+    }};
+    ( try $char:ty => $for_name:ident: $( $for_bit:expr ),+ ) => {
+        $( impl_from_char![@try $char => $for_name: $for_bit]; )+
+    };
+    ( @try $char:ty => $for_name:ident: $for_bit:expr ) => { paste! {
+        impl TryFrom<$char> for [< $for_name $for_bit >] {
+            type Error = Error;
+            fn try_from(c: $char) -> Result<[< $for_name $for_bit >]> {
+                let mut s = Self::default();
+                s.0.try_push(c.into())?;
+                Ok(s)
+            }
+        }
+    }};
+}
+impl_from_char![Char7 => Egc: 16, 24, 32, 40, 48, 56, 64, 128];
+impl_from_char![Char8 => Egc: 24, 32, 40, 48, 56, 64, 128];
+impl_from_char![try Char8 => Egc: 16];
+impl_from_char![Char16 => Egc: 32, 40, 48, 56, 64, 128];
+impl_from_char![try Char16 => Egc: 16, 24];
+impl_from_char![Char24 => Egc: 40, 48, 56, 64, 128];
+impl_from_char![try Char24 => Egc: 16, 24, 32];
+impl_from_char![Char32 => Egc: 40, 48, 56, 64, 128];
+impl_from_char![try Char32 => Egc: 16, 24, 32];
+impl_from_char![char => Egc: 40, 48, 56, 64, 128];
+impl_from_char![try char => Egc: 16, 24, 32];

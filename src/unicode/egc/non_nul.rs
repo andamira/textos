@@ -2,21 +2,49 @@
 //
 //!
 //
+// TOC
+// - definitions
+// - trait impls
+// - conversions
 
-use crate::unicode::{
-    char::*,
-    egc::Egcs,
-    string::{StaticNonNulString, Strings},
+use crate::{
+    error::{TextosError as Error, TextosResult as Result},
+    macros::impl_sized_alias,
+    unicode::{
+        char::*,
+        egc::Egcs,
+        string::{StaticNonNulString, Strings},
+    },
 };
 #[cfg(feature = "alloc")]
 use alloc::{ffi::CString, str::Chars};
 use core::fmt;
+use devela::paste;
 // use unicode_segmentation::UnicodeSegmentation;
+
+/* definitions */
 
 /// An extended grapheme cluster backed by a [`StaticNonNulString`].
 #[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[repr(transparent)]
 pub struct StaticNonNulEgc<const CAP: usize>(StaticNonNulString<CAP>);
+
+impl_sized_alias![
+    NonNulEgc, StaticNonNulEgc,
+    "extended grapheme cluster, with a fixed capacity of ",
+    ", that can't contain nul characters.":
+    "An" 8, 1 "";
+    "A" 16, 2 "s";
+    "A" 24, 3 "s";
+    "A" 32, 4 "s";
+    "A" 40, 5 "s";
+    "A" 48, 6 "s";
+    "A" 56, 7 "s";
+    "A" 64, 8 "s";
+    "A" 128, 16 "s"
+];
+
+/* impls */
 
 impl<const CAP: usize> StaticNonNulEgc<CAP> {
     /// Creates a new empty `StaticNonNulString`.
@@ -237,8 +265,9 @@ mod core_impls {
         }
     }
 
-    // impl From<String> for StaticNonNulEgc {
-    //     fn from(s: String) -> StaticNonNulEgc {
+    // TODO
+    // impl<const CAP: usize> From<String> for StaticNonNulEgc<CAP> {
+    //     fn from(s: String) -> StaticNonNulEgc<CAP> {
     //         StaticNonNulEgc(s.graphemes(true).take(1).collect())
     //     }
     // }
@@ -253,3 +282,47 @@ mod core_impls {
     //     }
     // }
 }
+
+/* conversions */
+
+macro_rules! impl_from_char {
+    // $char:ty char type
+    // $for_name: `for` type name prefix
+    // $bit: size in bits.
+    ( $char:ty => $for_name:ident: $( $for_bit:expr ),+ ) => {
+        $( impl_from_char![@$char => $for_name: $for_bit]; )+
+    };
+    ( @$char:ty => $for_name:ident: $for_bit:expr ) => { paste! {
+        impl From<$char> for [< $for_name $for_bit >] {
+            fn from(c: $char) -> [< $for_name $for_bit >] {
+                let mut s = Self::new();
+                let _ = s.0.push(c.into());
+                s
+            }
+        }
+    }};
+    ( try $char:ty => $for_name:ident: $( $for_bit:expr ),+ ) => {
+        $( impl_from_char![@try $char => $for_name: $for_bit]; )+
+    };
+    ( @try $char:ty => $for_name:ident: $for_bit:expr ) => { paste! {
+        impl TryFrom<$char> for [< $for_name $for_bit >] {
+            type Error = Error;
+            fn try_from(c: $char) -> Result<[< $for_name $for_bit >]> {
+                let mut s = Self::new();
+                s.0.try_push(c.into())?;
+                Ok(s)
+            }
+        }
+    }};
+}
+impl_from_char![Char7 => NonNulEgc: 8, 16, 24, 32, 40, 48, 56, 64, 128];
+impl_from_char![Char8 => NonNulEgc: 16, 24, 32, 40, 48, 56, 64, 128];
+impl_from_char![try Char8 => NonNulEgc: 8];
+impl_from_char![Char16 => NonNulEgc: 24, 32, 40, 48, 56, 64, 128];
+impl_from_char![try Char16 => NonNulEgc: 8, 16];
+impl_from_char![Char24 => NonNulEgc: 32, 40, 48, 56, 64, 128];
+impl_from_char![try Char24 => NonNulEgc: 8, 16, 24];
+impl_from_char![Char32 => NonNulEgc: 32, 40, 48, 56, 64, 128];
+impl_from_char![try Char32 => NonNulEgc: 8, 16, 24];
+impl_from_char![char => NonNulEgc: 32, 40, 48, 56, 64, 128];
+impl_from_char![try char => NonNulEgc: 8, 16, 24];
