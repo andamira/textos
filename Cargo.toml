@@ -15,24 +15,30 @@ include = [
 	"/README.md",
 ]
 categories = ["value-formatting", "no-std"]
-keywords = []
+keywords = ["text", "string", "unicode"]
 publish = true
 
 
 [features]
 default = ["std", "safe"]
 
-std = ["alloc", "devela/std", "unicode-truncate/std", "unicode-bidi/std", "unicode-script/std", "unicode-width/std"]
-alloc = []
-no-std = ["devela/no-std", "unicode-width/no_std"]
-#
-safe = ["devela/safe"]
-unsafe = [] # enable unsafe alternatives
+#* standard features *#
+
+std = ["alloc", "devela/std", "unicode-truncate/std", "unicode-bidi/std", "unicode-script/std", "unicode-width/std", "memchr/std"]
+alloc = [] # allocating no-std
+no-std = ["devela/no-std", "unicode-width/no_std"] # non-allocating no-std, imcompatible with "std"
+
+safe = [] # disables unsafe in this crate
+safest = ["safe", "devela/safe"] # disables unsafe in dependencies too
+unsafe = [] # enables unsafe alternatives, incompatible with "safe" (unused)
+
 nightly = [] # used only for better docs
 
 
 [dependencies]
 devela = { version = "0.5.1", default-features = false }
+
+memchr = { version = "2.5.0", default-features = false }
 
 unicode-bidi = { version = "0.3.10", default-features = false, features = ["hardcoded-data"] }
 unicode-blocks = { version = "0.1.5" }
