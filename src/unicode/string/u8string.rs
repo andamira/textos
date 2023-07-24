@@ -247,7 +247,7 @@ impl<const CAP: usize> StaticU8String<CAP> {
     /// Returns a mutable byte slice of the inner string slice.
     #[inline]
     #[cfg(not(feature = "safe"))]
-    #[cfg_attr(feature = "nightly", doc(cfg(feature = "unsafe")))]
+    #[cfg_attr(feature = "nightly", doc(cfg(feature = "not(safe)")))]
     pub unsafe fn as_bytes_mut(&mut self) -> &mut [u8] {
         self.arr.get_unchecked_mut(0..self.len as usize)
     }
@@ -289,7 +289,7 @@ impl<const CAP: usize> StaticU8String<CAP> {
 
     /// Returns the mutable inner string slice.
     #[cfg(not(feature = "safe"))]
-    #[cfg_attr(feature = "nightly", doc(cfg(feature = "unsafe")))]
+    #[cfg_attr(feature = "nightly", doc(cfg(feature = "not(safe)")))]
     pub fn as_str_mut(&mut self) -> &mut str {
         unsafe { &mut *(self.as_bytes_mut() as *mut [u8] as *mut str) }
     }

@@ -251,7 +251,7 @@ impl<const CAP: usize> StaticNonNulString<CAP> {
     /// Returns a mutable byte slice of the inner string slice.
     #[inline]
     #[cfg(not(feature = "safe"))]
-    #[cfg_attr(feature = "nightly", doc(cfg(feature = "unsafe")))]
+    #[cfg_attr(feature = "nightly", doc(cfg(feature = "not(safe)")))]
     pub unsafe fn as_bytes_mut(&mut self) -> &mut [u8] {
         let len = self.len();
         self.arr.get_unchecked_mut(0..len)
@@ -288,7 +288,7 @@ impl<const CAP: usize> StaticNonNulString<CAP> {
 
     /// Returns the mutable inner string slice.
     #[cfg(not(feature = "safe"))]
-    #[cfg_attr(feature = "nightly", doc(cfg(feature = "unsafe")))]
+    #[cfg_attr(feature = "nightly", doc(cfg(feature = "not(safe)")))]
     pub unsafe fn as_str_mut(&mut self) -> &mut str {
         &mut *(self.as_bytes_mut() as *mut [u8] as *mut str)
     }
