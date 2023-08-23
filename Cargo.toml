@@ -33,6 +33,7 @@ safest = ["safe", "devela/safe"] # disables unsafe in dependencies too
 unsafe = [] # enables unsafe alternatives, incompatible with "safe" (unused)
 
 nightly = [] # used only for better docs
+nightly_docs = ["nightly", "std", "unsafe"]
 
 
 [dependencies]
@@ -55,7 +56,7 @@ unicode-width = { version = "0.1.10", default-features = false }
 
 [package.metadata.docs.rs]
 no-default-features = true
-features = ["nightly", "std"]
+features = ["nightly_docs"]
 
 [badges]
 maintenance = { status = "experimental" }
