@@ -24,14 +24,16 @@ use devela::codegen::paste;
 
 /* definitions */
 
-/// An extended grapheme cluster backed by a [`StaticU8String`].
+/// An <abbr title="Extended Grapheme Cluster">EGC</abbr> backed by a
+/// [`StaticU8String`].
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[repr(transparent)]
 pub struct StaticU8Egc<const CAP: usize>(StaticU8String<CAP>);
 
 impl_sized_alias![
     Egc, StaticU8Egc,
-    "extended grapheme cluster, with a fixed capacity of ", ".":
+    "<abbr title='Extended Grapheme Cluster'>EGC</abbr>, with fixed capacity of ",
+    ".":
     "A" 16, 1 "";
     "A" 24, 2 "s";
     "A" 32, 3 "s";

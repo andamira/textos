@@ -22,7 +22,7 @@ use devela::codegen::paste;
 /* definitions */
 
 /// A UTF-8-encoded string, backed by an array,
-/// with a maximum constant capacity of 255 bytes.
+/// with 255 bytes of maximum constant capacity.
 ///
 /// Internally, the current length is stored as a [`u8`].
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -34,7 +34,7 @@ pub struct StaticU8String<const CAP: usize> {
 
 impl_sized_alias![
     String, StaticU8String,
-    "UTF-8-encoded string, with a fixed capacity of ", ".":
+    "UTF-8-encoded string, with fixed capacity of ", ".":
     "A" 16, 1 "";
     "A" 24, 2 "s";
     "A" 32, 3 "s";

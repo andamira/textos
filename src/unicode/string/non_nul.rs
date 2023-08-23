@@ -23,8 +23,8 @@ use devela::codegen::paste;
 /// The nul character.
 const NUL: char = '\0';
 
-/// A UTF-8-encoded string, backed by an array of constant capacity,
-/// that can't contain nul characters.
+/// A UTF-8-encoded string, backed by an array of constant capacity.
+/// Can't contain nul chars.
 ///
 /// Internally, the first 0 byte in the array indicates the end of the string.
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -34,8 +34,8 @@ pub struct StaticNonNulString<const CAP: usize> {
 
 impl_sized_alias![
     NonNulString, StaticNonNulString,
-    "UTF-8-encoded string, with a fixed capacity of ",
-    ", that can't contain nul characters.":
+    "UTF-8-encoded string, with fixed capacity of ",
+    ", no nul chars.":
     "An" 8, 1 "";
     "A" 16, 2 "s";
     "A" 24, 3 "s";

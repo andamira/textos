@@ -24,15 +24,16 @@ use devela::codegen::paste;
 
 /* definitions */
 
-/// An extended grapheme cluster backed by a [`StaticNonNulString`].
+/// An <abbr title="Extended Grapheme Cluster">EGC</abbr> backed by a
+/// [`StaticNonNulString`].
 #[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[repr(transparent)]
 pub struct StaticNonNulEgc<const CAP: usize>(StaticNonNulString<CAP>);
 
 impl_sized_alias![
     NonNulEgc, StaticNonNulEgc,
-    "extended grapheme cluster, with a fixed capacity of ",
-    ", that can't contain nul characters.":
+    "<abbr title='Extended Grapheme Cluster'>EGC</abbr>, with fixed capacity of ",
+    ", no nul chars.":
     "An" 8, 1 "";
     "A" 16, 2 "s";
     "A" 24, 3 "s";
