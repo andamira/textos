@@ -14,7 +14,7 @@ include = [
 	"/LICENSE-*",
 	"/README.md",
 ]
-categories = ["value-formatting", "no-std"]
+categories = ["text-processing", "value-formatting", "no-std::no-alloc"]
 keywords = ["text", "string", "unicode"]
 publish = true
 
