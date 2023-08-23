@@ -233,12 +233,12 @@ impl<const CAP: usize> StaticU8String<CAP> {
     /// Returns a byte slice of the inner string slice.
     #[inline]
     pub fn as_bytes(&self) -> &[u8] {
-        #[cfg(not(feature = "safe"))]
+        #[cfg(feature = "unsafe")]
         unsafe {
             self.arr.get_unchecked(0..self.len as usize)
         }
 
-        #[cfg(feature = "safe")]
+        #[cfg(not(feature = "unsafe"))]
         self.arr
             .get(0..self.len as usize)
             .expect("len must be <= arr.len()")
@@ -246,8 +246,8 @@ impl<const CAP: usize> StaticU8String<CAP> {
 
     /// Returns a mutable byte slice of the inner string slice.
     #[inline]
-    #[cfg(not(feature = "safe"))]
-    #[cfg_attr(feature = "nightly", doc(cfg(feature = "not(safe)")))]
+    #[cfg(feature = "unsafe")]
+    #[cfg_attr(feature = "nightly", doc(cfg(feature = "unsafe")))]
     pub unsafe fn as_bytes_mut(&mut self) -> &mut [u8] {
         self.arr.get_unchecked_mut(0..self.len as usize)
     }
@@ -270,7 +270,7 @@ impl<const CAP: usize> StaticU8String<CAP> {
 
     /// Returns the inner string slice.
     pub fn as_str(&self) -> &str {
-        #[cfg(not(feature = "safe"))]
+        #[cfg(feature = "unsafe")]
         unsafe {
             core::str::from_utf8_unchecked(
                 self.arr
@@ -278,7 +278,7 @@ impl<const CAP: usize> StaticU8String<CAP> {
                     .expect("len must be <= arr.len()"),
             )
         }
-        #[cfg(feature = "safe")]
+        #[cfg(not(feature = "unsafe"))]
         core::str::from_utf8(
             self.arr
                 .get(0..self.len as usize)
@@ -288,8 +288,8 @@ impl<const CAP: usize> StaticU8String<CAP> {
     }
 
     /// Returns the mutable inner string slice.
-    #[cfg(not(feature = "safe"))]
-    #[cfg_attr(feature = "nightly", doc(cfg(feature = "not(safe)")))]
+    #[cfg(feature = "unsafe")]
+    #[cfg_attr(feature = "nightly", doc(cfg(feature = "unsafe")))]
     pub fn as_str_mut(&mut self) -> &mut str {
         unsafe { &mut *(self.as_bytes_mut() as *mut [u8] as *mut str) }
     }

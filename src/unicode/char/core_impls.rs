@@ -151,11 +151,11 @@ impl From<Char16> for Char24 {
 impl From<Char16> for Char32 {
     #[inline]
     fn from(c: Char16) -> Char32 {
-        #[cfg(feature = "safe")]
+        #[cfg(not(feature = "unsafe"))]
         return c.to_char32();
 
         // SAFETY: we've already checked we contain a valid char.
-        #[cfg(not(feature = "safe"))]
+        #[cfg(feature = "unsafe")]
         return unsafe { Char32(char::from_u32_unchecked(c.0.get() as u32)) };
     }
 }
@@ -192,11 +192,11 @@ impl TryFrom<Char24> for Char16 {
 impl From<Char24> for Char32 {
     #[inline]
     fn from(c: Char24) -> Char32 {
-        #[cfg(feature = "safe")]
+        #[cfg(not(feature = "unsafe"))]
         return c.to_char32();
 
         // SAFETY: we've already checked we contain a valid char.
-        #[cfg(not(feature = "safe"))]
+        #[cfg(feature = "unsafe")]
         return unsafe { Char32(char::from_u32_unchecked(c.to_u32())) };
     }
 }

@@ -183,8 +183,8 @@ impl<const CAP: usize> StaticNonNulEgc<CAP> {
 
     /// Returns a mutable byte slice of the inner string slice.
     #[inline]
-    #[cfg(not(feature = "safe"))]
-    #[cfg_attr(feature = "nightly", doc(cfg(feature = "not(safe)")))]
+    #[cfg(feature = "unsafe")]
+    #[cfg_attr(feature = "nightly", doc(cfg(feature = "unsafe")))]
     pub unsafe fn as_bytes_mut(&mut self) -> &mut [u8] {
         self.0.as_bytes_mut()
     }
@@ -212,8 +212,8 @@ impl<const CAP: usize> StaticNonNulEgc<CAP> {
     }
 
     /// Returns the mutable inner string slice.
-    #[cfg(not(feature = "safe"))]
-    #[cfg_attr(feature = "nightly", doc(cfg(feature = "not(safe)")))]
+    #[cfg(feature = "unsafe")]
+    #[cfg_attr(feature = "nightly", doc(cfg(feature = "unsafe")))]
     pub unsafe fn as_str_mut(&mut self) -> &mut str {
         self.0.as_str_mut()
     }

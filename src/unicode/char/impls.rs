@@ -205,13 +205,13 @@ impl Char7 {
     }
     // useful because Option::<T>::unwrap is not yet stable as const fn
     const fn new_unchecked(value: u8) -> Char7 {
-        #[cfg(feature = "safe")]
+        #[cfg(not(feature = "unsafe"))]
         if let Some(c) = NonMaxU8::new(value) {
             Char7(c)
         } else {
             unreachable![]
         }
-        #[cfg(not(feature = "safe"))]
+        #[cfg(feature = "unsafe")]
         unsafe {
             Char7(NonMaxU8::new_unchecked(value))
         }
@@ -522,13 +522,13 @@ impl Char16 {
     }
     // useful because Option::<T>::unwrap is not yet stable as const fn
     const fn new_unchecked(value: u16) -> Char16 {
-        #[cfg(feature = "safe")]
+        #[cfg(not(feature = "unsafe"))]
         if let Some(c) = NonSurrogateU16::new(value) {
             Char16(c)
         } else {
             unreachable![]
         }
-        #[cfg(not(feature = "safe"))]
+        #[cfg(feature = "unsafe")]
         unsafe {
             Char16(NonSurrogateU16::new_unchecked(value))
         }
@@ -559,12 +559,12 @@ impl Char16 {
     #[inline]
     #[rustfmt::skip]
     pub const fn to_char(self) -> char {
-        // #[cfg(feature = "safe")]
+        // #[cfg(not(feature = "unsafe"))]
         if let Some(c) = char::from_u32(self.0.get() as u32) { c } else { unreachable![] }
 
         // WAITING for stable const: https://github.com/rust-lang/rust/issues/89259
         // SAFETY: we've already checked we contain a valid char.
-        // #[cfg(not(feature = "safe"))]
+        // #[cfg(feature = "unsafe")]
         // return unsafe { char::from_u32_unchecked(self.0 as u32) };
     }
     /// Converts this `Char16` to `u32`.
@@ -714,13 +714,13 @@ impl Char24 {
     }
     // useful because Option::<T>::unwrap is not yet stable as const fn
     const fn new_unchecked_hi(value: u8) -> NonMaxU8 {
-        #[cfg(feature = "safe")]
+        #[cfg(not(feature = "unsafe"))]
         if let Some(c) = NonMaxU8::new(value) {
             c
         } else {
             unreachable![]
         }
-        #[cfg(not(feature = "safe"))]
+        #[cfg(feature = "unsafe")]
         unsafe {
             NonMaxU8::new_unchecked(value)
         }
@@ -757,12 +757,12 @@ impl Char24 {
     #[inline]
     #[rustfmt::skip]
     pub const fn to_char(self) -> char {
-        // #[cfg(feature = "safe")]
+        // #[cfg(not(feature = "unsafe"))]
         if let Some(c) = char::from_u32(self.to_u32()) { c } else { unreachable![] }
 
         // WAITING for stable const: https://github.com/rust-lang/rust/issues/89259
         // SAFETY: we've already checked we contain a valid char.
-        // #[cfg(not(feature = "safe"))]
+        // #[cfg(feature = "unsafe")]
         // return unsafe { char::from_u32_unchecked(code_point) };
     }
 

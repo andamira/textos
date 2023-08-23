@@ -241,17 +241,17 @@ impl<const CAP: usize> StaticNonNulString<CAP> {
     /// Returns a byte slice of the inner string slice.
     #[inline]
     pub fn as_bytes(&self) -> &[u8] {
-        #[cfg(feature = "safe")]
+        #[cfg(not(feature = "unsafe"))]
         return self.arr.get(0..self.len()).unwrap();
 
-        #[cfg(not(feature = "safe"))]
+        #[cfg(feature = "unsafe")]
         return unsafe { self.arr.get_unchecked(0..self.len()) };
     }
 
     /// Returns a mutable byte slice of the inner string slice.
     #[inline]
-    #[cfg(not(feature = "safe"))]
-    #[cfg_attr(feature = "nightly", doc(cfg(feature = "not(safe)")))]
+    #[cfg(feature = "unsafe")]
+    #[cfg_attr(feature = "nightly", doc(cfg(feature = "unsafe")))]
     pub unsafe fn as_bytes_mut(&mut self) -> &mut [u8] {
         let len = self.len();
         self.arr.get_unchecked_mut(0..len)
@@ -276,19 +276,20 @@ impl<const CAP: usize> StaticNonNulString<CAP> {
     /// Returns the inner string slice.
     #[inline]
     pub fn as_str(&self) -> &str {
-        #[cfg(feature = "safe")]
+        #[cfg(not(feature = "unsafe"))]
         return core::str::from_utf8(self.arr.get(0..self.len()).unwrap())
             .expect("must be valid utf-8");
 
-        #[cfg(not(feature = "safe"))]
+        // SAFETY
+        #[cfg(feature = "unsafe")]
         unsafe {
             return core::str::from_utf8_unchecked(self.arr.get_unchecked(0..self.len()));
         }
     }
 
     /// Returns the mutable inner string slice.
-    #[cfg(not(feature = "safe"))]
-    #[cfg_attr(feature = "nightly", doc(cfg(feature = "not(safe)")))]
+    #[cfg(feature = "unsafe")]
+    #[cfg_attr(feature = "nightly", doc(cfg(feature = "unsafe")))]
     pub unsafe fn as_str_mut(&mut self) -> &mut str {
         &mut *(self.as_bytes_mut() as *mut [u8] as *mut str)
     }
