@@ -3,7 +3,7 @@
 use super::{Char16, Char24, Char32, Char7, Char8, NonMaxU8, NonSurrogateU16};
 use crate::error::{TextosError, TextosResult as Result};
 use core::fmt;
-use devela::paste;
+use devela::codegen::paste;
 
 /* Default, Display, Debug */
 

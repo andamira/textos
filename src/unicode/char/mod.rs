@@ -4,7 +4,7 @@
 //
 
 use crate::unicode::string::Strings;
-use devela::{NonSpecificU16, NonSpecificU8};
+use devela::num::{NonSpecificU16, NonSpecificU8};
 
 mod core_impls;
 mod impls;

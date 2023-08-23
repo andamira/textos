@@ -16,7 +16,7 @@ use crate::{
     unicode::char::*,
 };
 use core::fmt;
-use devela::paste;
+use devela::codegen::paste;
 
 /* definitions */
 

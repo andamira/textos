@@ -30,14 +30,14 @@ no-std = ["devela/no-std", "unicode-width/no_std"] # non-allocating no-std, imco
 
 safe = [] # disables unsafe in this crate
 safest = ["safe", "devela/safe"] # disables unsafe in dependencies too
-unsafe = [] # enables unsafe alternatives, incompatible with "safe" (unused)
+unsafe = ["devela/unsafe_num"] # enables unsafe alternatives, incompatible with "safe"
 
 nightly = [] # used only for better docs
 nightly_docs = ["nightly", "std", "unsafe"]
 
 
 [dependencies]
-devela = { version = "0.5.2", default-features = false }
+devela = { version = "0.7.1", default-features = false }
 
 memchr = { version = "2.5.0", default-features = false }
 

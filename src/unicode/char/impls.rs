@@ -17,7 +17,7 @@
 
 use super::{Char16, Char24, Char32, Char7, Char8, Chars, NonMaxU8, NonSurrogateU16, Strings};
 use crate::error::{TextosError, TextosResult as Result};
-use devela::paste;
+use devela::codegen::paste;
 
 /* common implementations */
 

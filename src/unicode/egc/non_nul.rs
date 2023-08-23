@@ -19,7 +19,7 @@ use crate::{
 #[cfg(feature = "alloc")]
 use alloc::{ffi::CString, str::Chars};
 use core::fmt;
-use devela::paste;
+use devela::codegen::paste;
 // use unicode_segmentation::UnicodeSegmentation;
 
 /* definitions */
