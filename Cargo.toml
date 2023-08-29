@@ -3,13 +3,14 @@ name = "textos"
 description = "Texts, strings, formatting, unicode…"
 version = "0.0.2"
 edition = "2021"
-rust-version = "1.71.1" # sync with readme, check.sh & .github/workflows/check.yml
+rust-version = "1.72.0" # sync with readme, check.sh & .github/workflows/check.yml
 authors = ["José Luis Cruz <joseluis@andamira.net>"]
 repository = "https://github.com/andamira/textos"
 documentation = "https://docs.rs/textos"
 license = "MIT OR Apache-2.0"
 include = [
 	"/src/**/*.rs",
+	"/src/**/*.md",
 	"/Cargo.toml",
 	"/LICENSE-*",
 	"/README.md",
@@ -20,26 +21,36 @@ publish = true
 
 
 [features]
-default = ["std", "safe"]
+default = ["std"]
 
-#* standard features *#
+# environment features
+# (not enabling "std" declares the library as "no_std")
+std = [ # features that depend on the standard library
+	"alloc",
+	"devela/std",
+	"unicode-truncate/std",
+	"unicode-bidi/std",
+	"unicode-script/std",
+	"unicode-width/std",
+]
+alloc = ["devela/alloc"] # features that depend on the standard library
+no_std = [ # features incompatible with the standard library
+	"devela/no_std",
+	"unicode-width/no_std"
+]
 
-std = ["alloc", "devela/std", "unicode-truncate/std", "unicode-bidi/std", "unicode-script/std", "unicode-width/std", "memchr/std"]
-alloc = [] # allocating no-std
-no-std = ["devela/no-std", "unicode-width/no_std"] # non-allocating no-std, imcompatible with "std"
+# safety features
+safe = []
+safest = ["safe", "devela/safest"]
+unsafe = ["devela/unsafe_num"]
+unsafest = ["unsafe", "devela/unsafest"]
 
-safe = [] # disables unsafe in this crate
-safest = ["safe", "devela/safe"] # disables unsafe in dependencies too
-unsafe = ["devela/unsafe_num"] # enables unsafe alternatives, incompatible with "safe"
-
-nightly = [] # used only for better docs
-nightly_docs = ["nightly", "std", "unsafe"]
+nightly = [] # used only for enhanced documentation
+nightly_docs = ["nightly", "std", "unsafe"] # features for docs.rs
 
 
 [dependencies]
-devela = { version = "0.7.1", default-features = false }
-
-memchr = { version = "2.5.0", default-features = false }
+devela = { version = "0.8.0", default-features = false }
 
 unicode-bidi = { version = "0.3.10", default-features = false, features = ["hardcoded-data"] }
 unicode-blocks = { version = "0.1.8" }
@@ -49,7 +60,6 @@ unicode-script = "0.5.5" # http://www.unicode.org/reports/tr24/
 unicode-segmentation = "1.10.1"
 unicode-truncate = { version = "0.2.0", default-features = false }
 unicode-width = { version = "0.1.10", default-features = false }
-
 
 [dev-dependencies]
 
