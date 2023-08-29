@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ## [Unreleased]
 
+## [0.0.3] - 2023-08-27
+
 ### Added
 - new features: `nightly_docs`, `unsafest`.
 - impl conversions from scalars to strings & egcs.
@@ -23,7 +25,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 - remove `int_buf` module, move to `devela`.
 
 ### Changed
-- bump devela `0.8.0`.
+- bump devela to `0.8.0`.
 - bump MSRV to `1.72.0`.
 - deprecate and rename `no-std` feature to `no_std`.
 - include in the crate any markdown files in `src/`
@@ -50,7 +52,8 @@ First release.
 - new macro: `ascii_eq_uncased`.
 
 
-[unreleased]: https://github.com/andamira/textos/compare/v0.0.2...HEAD
+[unreleased]: https://github.com/andamira/textos/compare/v0.0.3...HEAD
+[0.0.3]: https://github.com/andamira/textos/releases/tag/v0.0.3
 [0.0.2]: https://github.com/andamira/textos/releases/tag/v0.0.2
 [0.0.1]: https://github.com/andamira/textos/releases/tag/v0.0.1
 
