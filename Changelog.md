@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 - new scalar method `to_utf8_bytes`.
 - new types `Egc`, `StaticNonNullEgc`, `StaticU8Egc`
     - new sized type aliases from 8 to 128 bits.
+- new `iformat` macro.
 
 ### Removed
 - remove `safe` from the `default` features.

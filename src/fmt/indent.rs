@@ -5,6 +5,22 @@
 #[cfg(feature = "alloc")]
 use alloc::{format, string::String, vec::Vec};
 
+/// *`i`ndented `format`*.
+///
+/// # Examples
+/// ```
+/// use textos::fmt::iformat;
+///
+/// assert_eq!["  foo\n  bar", &iformat!(2, "{}\n{}", "foo", "bar")];
+/// ```
+#[macro_export]
+macro_rules! iformat {
+    ($indent:expr, $($args:tt)*) => {
+        $crate::fmt::indent($indent, &format![$($args)*])
+    };
+}
+pub use iformat;
+
 /// Indents a multi-line `string` slice with the given number of `spaces`.
 ///
 /// # Examples
