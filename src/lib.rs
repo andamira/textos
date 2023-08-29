@@ -27,5 +27,6 @@ pub mod unicode;
 /// Everything is directly available here.
 pub mod all {
     #[doc(inline)]
+    #[allow(unused_imports)]
     pub use super::{ascii::*, error::*, fmt::*, unicode::all::*};
 }
