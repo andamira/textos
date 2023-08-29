@@ -7,7 +7,10 @@ use crate::unicode::char::*;
 use core::fmt;
 use unicode_segmentation::UnicodeSegmentation;
 
-use alloc::str::{self, Chars};
+use alloc::{
+    str::{self, Chars},
+    string::String,
+};
 
 /// An extended grapheme cluster backed by a [`String`].
 #[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]

@@ -9,7 +9,7 @@
 // - tests
 
 #[cfg(feature = "alloc")]
-use alloc::{ffi::CString, str::Chars};
+use alloc::{ffi::CString, str::Chars, string::ToString};
 
 use crate::{
     error::{TextosError as Error, TextosResult as Result},
