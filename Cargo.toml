@@ -48,6 +48,8 @@ unsafest = ["unsafe", "devela/unsafest"]
 nightly = [] # used only for enhanced documentation
 nightly_docs = ["nightly", "std", "unsafe"] # features for docs.rs
 
+# deprecated features
+no-std = ["no_std"]
 
 [dependencies]
 devela = { version = "0.8.0", default-features = false }
