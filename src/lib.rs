@@ -18,7 +18,7 @@ compile_error!("You can't enable the `std` and `no_std` features at the same tim
 #[cfg(all(feature = "safe", feature = "unsafe"))]
 compile_error!("You can't enable the `safe` and `unsafe*` features at the same time.");
 // deprecated
-deprecate_feature![old: "no-std", new: "no_std", since: "0.0.3"];
+devela::deprecate_feature![old: "no-std", new: "no_std", since: "0.0.3"];
 
 pub mod error;
 

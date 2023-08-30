@@ -19,13 +19,14 @@ categories = ["text-processing", "value-formatting", "no-std::no-alloc"]
 keywords = ["text", "string", "unicode"]
 publish = true
 
+# ------------------------------------------------------------------------------
 
 [features]
 default = ["std"]
 
-# environment features
+#* environment features */
 # (not enabling "std" declares the library as "no_std")
-std = [ # features that depend on the standard library
+std = [ # enables functionality that depend on the standard library
 	"alloc",
 	"devela/std",
 	"unicode-truncate/std",
@@ -33,23 +34,24 @@ std = [ # features that depend on the standard library
 	"unicode-script/std",
 	"unicode-width/std",
 ]
-alloc = ["devela/alloc"] # features that depend on the standard library
-no_std = [ # features incompatible with the standard library
+alloc = ["devela/alloc"] # enables functionality that depend on the standard library
+no_std = [ # enables functionality incompatible with the standard library
 	"devela/no_std",
 	"unicode-width/no_std"
 ]
 
-# safety features
-safe = []
-safest = ["safe", "devela/safest"]
-unsafe = ["devela/unsafe_num"]
-unsafest = ["unsafe", "devela/unsafest"]
+#* safety features *#
+safe = [] # forbids unsafe at the crate level
+safest = ["safe", "devela/safest"] # forbids unsafe recursively
+unsafe = ["devela/unsafe_num"] # enables unsafe features at the crate level
+unsafest = ["unsafe", "devela/unsafest"] # enables unsafe recursively
 
+#* nightly features *#
 nightly = [] # used only for enhanced documentation
 nightly_docs = ["nightly", "std", "unsafe"] # features for docs.rs
 
 # deprecated features
-no-std = ["no_std"]
+no-std = ["no_std"] # since 0.0.3
 
 [dependencies]
 devela = { version = "0.8.0", default-features = false }
@@ -65,6 +67,7 @@ unicode-width = { version = "0.1.10", default-features = false }
 
 [dev-dependencies]
 
+# ------------------------------------------------------------------------------
 
 [package.metadata.docs.rs]
 no-default-features = true
