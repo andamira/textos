@@ -1,5 +1,6 @@
-// textos
-//!
+// textos::lib
+//
+//! Texts, strings, formatting, unicode…
 //
 
 // warnings
@@ -27,7 +28,7 @@ pub mod fmt;
 pub(crate) mod macros;
 pub mod unicode;
 
-/// Everything is directly available here.
+/// All items are reexported here.
 pub mod all {
     #[doc(inline)]
     #[allow(unused_imports)] // for no_std
