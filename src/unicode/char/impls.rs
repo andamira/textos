@@ -15,7 +15,9 @@
 //   - traits for char
 // - helper fns
 
-use super::{Char16, Char24, Char32, Char7, Char8, Chars, NonMaxU8, NonSurrogateU16, Strings};
+use super::{
+    Char16, Char24, Char32, Char7, Char8, NonMaxU8, NonSurrogateU16, Textual, UnicodeScalar,
+};
 use crate::error::{TextosError, TextosResult as Result};
 use devela::codegen::paste;
 
@@ -29,9 +31,9 @@ macro_rules! impls {
 
         /* impl traits */
 
-        impl Strings for [<$name $bits>] {}
+        impl Textual for [<$name $bits>] {}
 
-        impl Chars for [<$name $bits>] {
+        impl UnicodeScalar for [<$name $bits>] {
             const MAX: Self = Self::MAX;
 
             /* encode */
@@ -1021,9 +1023,9 @@ impl Char32 {
 
 /* traits for char */
 
-impl Strings for char {}
+impl Textual for char {}
 
-impl Chars for char {
+impl UnicodeScalar for char {
     const MAX: Self = Self::MAX;
 
     /* encode */

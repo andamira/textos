@@ -23,7 +23,7 @@ pub use all::*;
 pub(crate) mod all {
     #[doc(inline)]
     pub use super::{
-        char::{Char16, Char24, Char32, Char7, Char8, Chars},
+        char::{Char16, Char24, Char32, Char7, Char8, UnicodeScalar},
         draw::all::*,
         egc::*,
         find_unicode_block,

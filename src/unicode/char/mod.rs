@@ -3,7 +3,7 @@
 //! Unicode scalars.
 //
 
-use crate::unicode::string::Strings;
+use crate::textual::Textual;
 use devela::num::{NonSpecificU16, NonSpecificU8};
 
 mod core_impls;
@@ -99,7 +99,7 @@ pub struct Char24 {
 pub struct Char32(pub char);
 
 /// Common trait for unicode scalars.
-pub trait Chars: Strings {
+pub trait UnicodeScalar: Textual {
     /// The highest unicode scalar that can be represented by this type.
     const MAX: Self;
 

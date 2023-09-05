@@ -26,11 +26,12 @@ pub mod error;
 mod ascii;
 pub mod fmt;
 pub(crate) mod macros;
+pub mod textual;
 pub mod unicode;
 
 /// All items are reexported here.
 pub mod all {
     #[doc(inline)]
     #[allow(unused_imports)] // for no_std
-    pub use super::{ascii::*, error::*, fmt::*, unicode::all::*};
+    pub use super::{ascii::*, error::*, fmt::*, textual::*, unicode::all::*};
 }

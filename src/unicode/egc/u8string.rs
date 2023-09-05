@@ -10,11 +10,8 @@
 use crate::{
     error::{TextosError as Error, TextosResult as Result},
     macros::impl_sized_alias,
-    unicode::{
-        char::*,
-        egc::Egcs,
-        string::{StaticU8String, Strings},
-    },
+    textual::Textual,
+    unicode::{char::*, egc::Egc, string::StaticU8String},
 };
 #[cfg(feature = "alloc")]
 use alloc::{ffi::CString, str::Chars};
@@ -226,8 +223,8 @@ impl<const CAP: usize> StaticU8Egc<CAP> {
 
 /* traits */
 
-impl<const CAP: usize> Strings for StaticU8Egc<CAP> {}
-impl<const CAP: usize> Egcs for StaticU8Egc<CAP> {}
+impl<const CAP: usize> Textual for StaticU8Egc<CAP> {}
+impl<const CAP: usize> Egc for StaticU8Egc<CAP> {}
 
 mod core_impls {
     use super::*;

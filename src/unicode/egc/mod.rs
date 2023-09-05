@@ -9,7 +9,7 @@ mod string;
 mod u8string;
 
 /// Common trait for extended grapheme cluster types.
-pub trait Egcs {}
+pub trait Egc {}
 
 pub use all::*;
 pub(crate) mod all {
