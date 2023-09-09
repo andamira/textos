@@ -14,11 +14,14 @@ use alloc::{format, string::String, vec::Vec};
 /// assert_eq!["  foo\n  bar", &iformat!(2, "{}\n{}", "foo", "bar")];
 /// ```
 #[macro_export]
+#[cfg(feature = "alloc")]
+#[cfg_attr(feature = "nightly", doc(cfg(feature = "alloc")))]
 macro_rules! iformat {
     ($indent:expr, $($args:tt)*) => {
         $crate::fmt::indent($indent, &format![$($args)*])
     };
 }
+#[cfg(feature = "alloc")]
 pub use iformat;
 
 /// Indents a multi-line `string` slice with the given number of `spaces`.
