@@ -28,32 +28,34 @@ default = []
 full = [] # (unused)
 
 #* environment features */
-# (not enabling "std" declares the library as "no_std")
-std = [ # enables functionality that depend on the standard library
-	"alloc",
+std = ["alloc", # disables `no_std` compatibility and enables `std` functionality
 	"devela/std",
 	# "unicode-truncate/std",
 	# "unicode-bidi/std",
 	# "unicode-script/std",
 	# "unicode-width/std",
 ]
-alloc = ["devela/alloc"] # enables functionality that depend on the standard library
-no_std = [ # enables functionality incompatible with the standard library
+alloc = ["devela/alloc"] # enables `alloc` functionality
+no_std = [ # enables functionality incompatible with `std`
 	"devela/no_std",
 	# "unicode-width/no_std"
 ]
 
 #* safety features *#
-safe = [] # forbids unsafe at the crate level
-safest = ["safe", "devela/safest"] # forbids unsafe recursively
-unsafe = ["devela/unsafe_num"] # enables unsafe features at the crate level
 unsafest = ["unsafe", "devela/unsafest"] # enables unsafe recursively
+unsafe = [ # enables unsafe functionality in this crate
+	"devela/unsafe_num", # enables unchecked constructors
+]
+safe = [] # forbids unsafe in this crate
+safest = ["safe", "devela/safest"] # forbids unsafe recursively
 
 #* nightly features *#
-nightly = [] # used only for enhanced documentation
-nightly_docs = ["nightly", "full", "std", "unsafe"] # features for docs.rs
+nightly = [] # enables nightly features
+nightly_docs = [ # enables features for docs.rs
+	"nightly", "full", "std", "unsafe",
+]
 
-# deprecated features
+#* deprecated features *#
 no-std = ["no_std"] # since 0.0.3
 
 [dependencies]
