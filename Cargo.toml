@@ -31,15 +31,15 @@ default = []
 std = [ # enables functionality that depend on the standard library
 	"alloc",
 	"devela/std",
-	"unicode-truncate/std",
-	"unicode-bidi/std",
-	"unicode-script/std",
-	"unicode-width/std",
+	# "unicode-truncate/std",
+	# "unicode-bidi/std",
+	# "unicode-script/std",
+	# "unicode-width/std",
 ]
 alloc = ["devela/alloc"] # enables functionality that depend on the standard library
 no_std = [ # enables functionality incompatible with the standard library
 	"devela/no_std",
-	"unicode-width/no_std"
+	# "unicode-width/no_std"
 ]
 
 #* safety features *#
@@ -58,16 +58,14 @@ no-std = ["no_std"] # since 0.0.3
 [dependencies]
 devela = "0.9.0"
 
-unicode-bidi = { version = "0.3.10", default-features = false, features = ["hardcoded-data"] }
+# unicode-bidi = { version = "0.3.10", default-features = false, features = ["hardcoded-data"] }
 unicode-blocks = { version = "0.1.8" }
-unicode-ident = { version = "1.0.11" }
-unicode-linebreak = "0.1.4"
-unicode-script = "0.5.5" # http://www.unicode.org/reports/tr24/
+# unicode-ident = { version = "1.0.11" }
+# unicode-linebreak = "0.1.4"
+# unicode-script = "0.5.5" # http://www.unicode.org/reports/tr24/
 unicode-segmentation = "1.10.1"
-unicode-truncate = { version = "0.2.0", default-features = false }
-unicode-width = { version = "0.1.10", default-features = false }
-
-[dev-dependencies]
+# unicode-truncate = { version = "0.2.0", default-features = false }
+# unicode-width = { version = "0.1.10", default-features = false }
 
 # ------------------------------------------------------------------------------
 
