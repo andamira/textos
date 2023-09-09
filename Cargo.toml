@@ -56,7 +56,7 @@ nightly_docs = ["nightly", "std", "unsafe"] # features for docs.rs
 no-std = ["no_std"] # since 0.0.3
 
 [dependencies]
-devela = { version = "0.8.0", default-features = false }
+devela = "0.9.0"
 
 unicode-bidi = { version = "0.3.10", default-features = false, features = ["hardcoded-data"] }
 unicode-blocks = { version = "0.1.8" }
