@@ -25,6 +25,7 @@ publish = true
 
 #* capability features *#
 default = []
+full = [] # (unused)
 
 #* environment features */
 # (not enabling "std" declares the library as "no_std")
@@ -50,7 +51,7 @@ unsafest = ["unsafe", "devela/unsafest"] # enables unsafe recursively
 
 #* nightly features *#
 nightly = [] # used only for enhanced documentation
-nightly_docs = ["nightly", "std", "unsafe"] # features for docs.rs
+nightly_docs = ["nightly", "full", "std", "unsafe"] # features for docs.rs
 
 # deprecated features
 no-std = ["no_std"] # since 0.0.3
